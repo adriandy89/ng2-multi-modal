@@ -97,6 +97,39 @@
           }
         }
       }
+    },
+    "ng2-multi-modal": {
+      "projectType": "library",
+      "root": "projects/ng2-multi-modal",
+      "sourceRoot": "projects/ng2-multi-modal/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/ng2-multi-modal/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ng2-multi-modal/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ng2-multi-modal/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/ng2-multi-modal/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
     }
   }
 }
