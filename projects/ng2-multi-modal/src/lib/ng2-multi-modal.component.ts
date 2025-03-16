@@ -6,6 +6,7 @@ import {
   HostListener,
   input,
   model,
+  OnDestroy,
   output,
   signal,
   TemplateRef,
@@ -34,7 +35,7 @@ interface ModalSize {
   imports: [CommonModule, CloseIcon, LoadingIcon, MaximizeIcon, MinimizeIcon, MaximizeDIcon, StringTemplateOutletDirective],
   standalone: true,
 })
-export class Ng2MultiModalComponent implements AfterViewInit {
+export class Ng2MultiModalComponent implements AfterViewInit, OnDestroy {
   readonly modalId = signal('window' + Math.floor(Math.random() * 1000000));
   readonly titleHeight = signal(0);
   readonly position = signal<{ [key: string]: string }>({});
@@ -211,12 +212,72 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     }
   }
 
+  private preventTextSelection(prevent: boolean): void {
+    if (prevent) {
+      // Create a temporary overlay div that covers the entire viewport
+      // This catches all mouse events during resize/drag without affecting actual content
+      if (!document.getElementById('ng2-modal-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'ng2-modal-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.zIndex = '999999';
+        overlay.style.pointerEvents = 'none'; // Allow events to pass through
+        document.body.appendChild(overlay);
+      }
+
+      // Better to use a class to avoid direct style manipulation
+      document.body.classList.add('ng2-modal-no-select');
+
+      // Add style if it doesn't exist
+      if (!document.getElementById('ng2-modal-style')) {
+        const style = document.createElement('style');
+        style.id = 'ng2-modal-style';
+        style.innerHTML = `
+          .ng2-modal-no-select {
+            cursor: inherit !important;
+          }
+          .ng2-modal-no-select ::selection {
+            background: transparent !important;
+          }
+          .ng2-modal-no-select ::-moz-selection {
+            background: transparent !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    } else {
+      // Remove all elements we added
+      document.body.classList.remove('ng2-modal-no-select');
+      const overlay = document.getElementById('ng2-modal-overlay');
+      if (overlay) {
+        overlay.remove();
+      }
+    }
+  }
+
+  @HostListener('document:mouseleave')
+  documentMouseLeave() {
+    // Ensure text selection is re-enabled when the mouse leaves the document
+    this.preventTextSelection(false);
+    this.dragging.set(false);
+    this.windowMouseDownFlag.set(false);
+  }
+
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
     if (!this.draggable() || this.maximized()) {
       return;
     }
     this.mouseEventSignal.set(event);
+    // Only prevent text selection during actual dragging or resizing
+    if (this.dragging() || (this.windowMouseDownFlag() && this.resizable() &&
+      Object.values(this.border()).some(value => value === true))) {
+      this.preventTextSelection(true);
+    }
     if (this.dragging()) {
       // Replace when(this.align) with switch or if/else
       let newOffsetX = 0;
@@ -415,14 +476,29 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     if (event.button === 2) {
       return;
     }
+    // Prevent default action to avoid text selection
+    event.preventDefault();
+
+    // Enable text selection prevention
+    this.preventTextSelection(true);
+
     this.dragging.set(true);
     this.clickedX.set(event.clientX - this.leftSignal());
     this.clickedY.set(event.clientY - this.topSignal());
   }
 
-  @HostListener('document:mouseup', ['$event']) titleBarMouseUp(event: MouseEvent) {
+  @HostListener('document:mouseup', ['$event'])
+  titleBarMouseUp(event: MouseEvent) {
+    // We should always re-enable text selection on mouse up
+    this.preventTextSelection(false);
     this.dragging.set(false);
     this.windowMouseDownFlag.set(false);
+  }
+
+  // Add a key event listener to ensure we clean up if Escape is pressed
+  @HostListener('document:keydown.escape', ['$event'])
+  handleEscapeKey(event: KeyboardEvent) {
+    this.preventTextSelection(false);
   }
 
   windowMouseEnter(event: MouseEvent) {
@@ -439,6 +515,14 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     if (!this.draggable() || event.button === 2) {
       return;
     }
+
+    // Only prevent selection when clicking on a border for resizing
+    const onBorder = Object.values(this.border()).some(value => value === true);
+    if (onBorder && this.resizable()) {
+      event.preventDefault();
+      this.preventTextSelection(true);
+    }
+
     this.windowMouseDownFlag.set(true);
     this.onSelected.emit(this.modalId());
     if (this.windowMouseDownFlag() && this.windowMouseEnterFlag()) {
@@ -563,6 +647,14 @@ export class Ng2MultiModalComponent implements AfterViewInit {
         document.body.style.overflow = 'hidden';
       }
     }, 200);
+  }
+
+  ngOnDestroy(): void {
+    // Clean up any remaining text selection prevention
+    this.preventTextSelection(false);
+
+    // Remove any window resize handlers
+    window.onresize = null;
   }
 
   async ngAfterViewInit(): Promise<void> {
