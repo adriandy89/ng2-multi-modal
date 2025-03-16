@@ -23,7 +23,7 @@ Latest version available for each version of Angular
 
 | ng2-multi-modal | Angular     |
 |-----------------| ------------|
-| 1.0.0           | 19.0.0+     |
+| 1.0.2           | 19.0.0+     |
 
 ## Usage
 
