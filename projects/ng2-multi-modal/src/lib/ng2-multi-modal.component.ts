@@ -3,17 +3,13 @@ import {
   Component,
   computed,
   ElementRef,
-  EventEmitter,
   HostListener,
   input,
-  Input,
   model,
   output,
-  Output,
   signal,
   TemplateRef,
-  ViewChild,
-  WritableSignal
+  ViewChild
 } from '@angular/core';
 import { Ng2MultiModalService } from "./ng2-multi-modal.service";
 import { CommonModule } from "@angular/common";

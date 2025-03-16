@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, viewChild, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, viewChild } from '@angular/core';
 import { Ng2MultiModalComponent } from "../../../projects/ng2-multi-modal/src/lib/ng2-multi-modal.component";
 import { Ng2MultiModalService } from "../../../projects/ng2-multi-modal/src/lib/ng2-multi-modal.service";
 
@@ -24,10 +24,10 @@ export class Sample1Component implements OnInit {
   constructor(private _modal: Ng2MultiModalService) {
   }
 
-  @ViewChild('tpl', { static: true }) tpl!: TemplateRef<any>;
-  // tpl = viewChild.required('tpl', {
-  //   read: TemplateRef,
-  // });
+  // @ViewChild('tpl', { static: true }) tpl!: TemplateRef<any>;
+  tpl = viewChild.required('tpl', {
+    read: TemplateRef,
+  });
 
   modals: {
     [key: string]: {
@@ -40,7 +40,7 @@ export class Sample1Component implements OnInit {
   openModal() {
     this._modal.dockTheme.set('dark');
     this._modal.create({
-      content: this.tpl,
+      content: this.tpl(),
     }).then((modal: Ng2MultiModalComponent) => {
       const key = modal.modalId();
       this.modals[key] = {
@@ -57,7 +57,7 @@ export class Sample1Component implements OnInit {
 
   ngOnInit(): void {
     this._modal.create({
-      content: this.tpl,
+      content: this.tpl(),
     }).then((modals: Ng2MultiModalComponent) => {
       this.modals[modals.modalId()] = {
         modal: modals,
@@ -70,7 +70,7 @@ export class Sample1Component implements OnInit {
       });
     });
     this._modal.create({
-      content: this.tpl,
+      content: this.tpl(),
     }).then((win: Ng2MultiModalComponent) => {
       this.modals[win.modalId()] = {
         modal: win,
