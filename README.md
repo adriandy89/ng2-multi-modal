@@ -4,7 +4,7 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 # screenshot
 
-![screenshot](https://github.com/adriandy89/ng2-multi-modal/tree/master/public/screenshot.png?raw=true)
+![screenshot](https://github.com/adriandy89/ng2-multi-modal/blob/master/public/screenshot.png?raw=true)
 
 ## Development server
 
