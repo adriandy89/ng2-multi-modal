@@ -3,5 +3,9 @@
   "dest": "../../dist/ng2-multi-modal",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "assets": [
+    "styles/*.css",
+    "styles/theme/*.css"
+  ]
 }
