@@ -8,6 +8,7 @@ import {
   input,
   Input,
   model,
+  output,
   Output,
   signal,
   TemplateRef,
@@ -86,15 +87,24 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     isTop: false,
     isBottom: false
   })
-  @Output('onReady') onReady = new EventEmitter<Ng2MultiModalComponent>();
-  @Output('onClose') onClose = new EventEmitter<string>();
-  @Output('onResize') onResize = new EventEmitter<ModalSize>();
-  @Output('onMaximize') onMaximize = new EventEmitter<ModalSize>();
-  @Output('onMaximizeRestore') onMaximizeRestore = new EventEmitter<ModalSize>();
-  @Output('onMinimize') onMinimize = new EventEmitter<ModalSize>();
-  @Output('onMinimizeRestore') onMinimizeRestore = new EventEmitter<ModalSize>();
-  @Output('onSelected') onSelected = new EventEmitter<string>();
-  @Output('onMove') onMove = new EventEmitter<ModalSize>();
+  // @Output('onReady') onReady = new EventEmitter<Ng2MultiModalComponent>();
+  // @Output('onClose') onClose = new EventEmitter<string>();
+  // @Output('onResize') onResize = new EventEmitter<ModalSize>();
+  // @Output('onMaximize') onMaximize = new EventEmitter<ModalSize>();
+  // @Output('onMaximizeRestore') onMaximizeRestore = new EventEmitter<ModalSize>();
+  // @Output('onMinimize') onMinimize = new EventEmitter<ModalSize>();
+  // @Output('onMinimizeRestore') onMinimizeRestore = new EventEmitter<ModalSize>();
+  // @Output('onSelected') onSelected = new EventEmitter<string>();
+  // @Output('onMove') onMove = new EventEmitter<ModalSize>();
+  readonly onReady = output<Ng2MultiModalComponent>();
+  readonly onClose = output<string>();
+  readonly onResize = output<ModalSize>();
+  readonly onMaximize = output<ModalSize>();
+  readonly onMaximizeRestore = output<ModalSize>();
+  readonly onMinimize = output<ModalSize>();
+  readonly onMinimizeRestore = output<ModalSize>();
+  readonly onSelected = output<string>();
+  readonly onMove = output<ModalSize>();
   readonly minimized = model(false);
   readonly maximized = model(false);
   readonly propertyBeforeMaximize = signal<ModalSize | null>(null);
