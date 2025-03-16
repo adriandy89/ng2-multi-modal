@@ -1,63 +1,197 @@
 # Ng2MultiModal
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.0.
+A powerful Angular Signals base multi-modal component library that supports provideExperimentalZonelessChangeDetection() configuration and removed zone.js.
+Support dragging, resizing, maximizing, minimizing, and various comprehensive modal functions. It supports creation through both declarative templates and service methods, complete modal lifecycle management, and highly customizable styles.
 
-## Code scaffolding
+# screenshot
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+![screenshot](https://github.com/adriandy89/ng2-multi-modal/tree/master/public/screenshot.png?raw=true)
 
-```bash
-ng generate component component-name
-```
+## Installation
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the library, run:
+To install `ng2-multi-modal`, run:
 
 ```bash
-ng build ng2-multi-modal
+npm install ng2-multi-modal --save
 ```
 
-This command will compile your project, and the build artifacts will be placed in the `dist/` directory.
+# Dependencies
 
-### Publishing the Library
+Latest version available for each version of Angular
 
-Once the project is built, you can publish your library by following these steps:
+| ng2-multi-modal | Angular     |
+|-----------------| ------------|
+| 1.0.0           | 19.0.0+     |
 
-1. Navigate to the `dist` directory:
-   ```bash
-   cd dist/ng2-multi-modal
-   ```
+## Usage
 
-2. Run the `npm publish` command to publish your library to the npm registry:
-   ```bash
-   npm publish
-   ```
+Import `ng2-multi-modal` module in your Angular app:
 
-## Running unit tests
+```typescript
+import { Ng2MultiModalModule } from "ng2-multi-modal";
+```
+Then add `Ng2MultiModalModule` to your app's component imports:
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```typescript
+  imports: [
+      Ng2MultiModalModule,
+  ]
 ```
 
-## Running end-to-end tests
+Required for animations:
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
+```typescript
+export const appConfig: ApplicationConfig = {
+  providers: [provideAnimations()]
+};
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Using the service to create modals dynamically:
 
-## Additional Resources
+```typescript
+import { Ng2MultiModalService } from "ng2-multi-modal";
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+@Component({
+    selector: "app-root",
+    templateUrl: "./app.component.html",
+    styleUrls: ["./app.component.scss"],
+    standalone: true,
+})
+export class AppComponent {
+    constructor(private _modal: Ng2MultiModalService) {}
+
+    modals: {
+        [key: string]: {
+            modal: Ng2MultiModalComponent | null,
+            visible: boolean,
+        }
+    } = {};
+
+    openModal(template: TemplateRef<any>) {
+        this._modal.create({
+            content: template,
+            theme: this.theme, // ModelSignal<'light' | 'dark'>
+            title: 'My Modal',
+            width: 800,
+            height: 500,
+        }).then((modal: Ng2MultiModalComponent) => {
+            const key = modal.modalId();
+            this.modals[key] = {
+                modal,
+                visible: true,
+            };
+            
+            modal.onClose.subscribe(() => {
+                this.modals[key].visible = false;
+                this.modals[key].modal = null;
+            });
+        });
+    }
+}
+```
+
+Using the component in your template:
+
+```html
+<ng2-multi-modal>
+    <ng-template #content>
+        <!-- Modal content here -->
+    </ng-template>
+</ng2-multi-modal>
+```
+
+## Features
+
+- Draggable modals
+- Resizable modals
+- Maximize/minimize functionality
+- Multiple modals with z-index handling
+- Light and dark themes
+- Comprehensive modal lifecycle management
+- Highly customizable styles and behaviors
+- Angular 19+ signals API support
+
+## API
+
+### Ng2MultiModalComponent
+
+#### Inputs/Model Signals
+
+- `title` (string/TemplateRef): Modal title
+- `icon` (string/TemplateRef): Modal icon
+- `align` ('leftTop'/'rightTop'/'leftBottom'/'rightBottom'): Modal alignment
+- `width` (number): Modal width
+- `height` (number): Modal height
+- `minWidth` (number): Minimum modal width
+- `minHeight` (number): Minimum modal height
+- `offsetX` (number): X position offset
+- `offsetY` (number): Y position offset
+- `closable` (boolean): Whether the modal can be closed
+- `canMaximize` (boolean): Whether the modal can be maximized
+- `canMinimize` (boolean): Whether the modal can be minimized
+- `resizable` (boolean): Whether the modal can be resized
+- `outOfBounds` (boolean): Whether the modal can be dragged outside viewport
+- `draggable` (boolean): Whether the modal can be dragged
+- `loading` (boolean): Whether to show loading state
+- `loadingTip` (string/TemplateRef): Loading message/template
+- `content` (TemplateRef): Modal content
+- `contentScrollable` (boolean): Whether content can scroll
+- `theme` ('light'/'dark'): Modal theme
+- `zIndex` (number): Modal stacking order
+- `bodyStyle` (object): Custom styles for modal body
+- `closeOnNavigation` (boolean): Close modal when route changes
+- `minimized` (boolean): Whether the modal is minimized
+- `maximized` (boolean): Whether the modal is maximized
+
+#### Outputs Signals
+
+- `onClose`: Emitted when modal closes
+- `onResize`: Emitted when modal is resized
+- `onMaximize`: Emitted when modal is maximized
+- `onMaximizeRestore`: Emitted when maximized modal is restored
+- `onMinimize`: Emitted when modal is minimized
+- `onMinimizeRestore`: Emitted when minimized modal is restored
+- `onSelected`: Emitted when modal is selected/focused
+- `onMove`: Emitted when modal is moved
+
+## Custom Styling
+
+Import the styles in your project:
+
+```css
+@import "ng2-multi-modal/styles/theme/default.css";
+@import "ng2-multi-modal/styles/style.css";
+
+/* For dark theme */
+@import "ng2-multi-modal/styles/theme/default-dark.css";
+/*other theme we apply:*/
+/*@import 'ng2-multi-modal/styles/theme/default.css'*/
+/*@import 'ng2-multi-modal/styles/theme/macos.css'*/
+/*@import 'ng2-multi-modal/styles/theme/material-design.css'*/
+```
+
+you can modify styles by overload css varibles:
+
+```css
+/*For example, you can change the window title bar text align*/
+:root {
+    --window-title-bar-text-align: left;
+}
+
+/*Or you can change the window title bar text align for dark theme*/
+.ng-modal-theme-dark {
+    --window-title-bar-text-align: center;
+}
+```
+
+## Development
+
+To run the demo application:
+
+1. Clone the repository to your local machine.
+2. Install dependencies using `npm install`.
+3. Start the demo using `npm run start`.
+
+## Contribution
+
+We welcome community contributions and pull requests. To contribute to `ng2-multi-modal`, please fork the repository and open a pull request.

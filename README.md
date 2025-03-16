@@ -2,6 +2,10 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.8.
 
+# screenshot
+
+![screenshot](https://github.com/adriandy89/ng2-multi-modal/tree/master/public/screenshot.png?raw=true)
+
 ## Development server
 
 To start a local development server, run:

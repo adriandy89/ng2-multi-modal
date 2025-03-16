@@ -1,6 +1,6 @@
 {
   "name": "ng2-multi-modal",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Multi Modal Component for Angular 19+",
   "author": "Adrian Duardo",
   "license": "MIT",
@@ -9,8 +9,8 @@
     "url": "https://github.com/adriandy89/ng2-multi-modal.git"
   },
   "peerDependencies": {
-    "@angular/common": "^19.0.0",
-    "@angular/core": "^19.0.0"
+    "@angular/common": "^19.1.0",
+    "@angular/core": "^19.1.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
@@ -19,6 +19,8 @@
   "keywords": [
     "angular",
     "angular2",
+    "angular19",
+    "provideExperimentalZonelessChangeDetection",
     "component",
     "modal",
     "library",
