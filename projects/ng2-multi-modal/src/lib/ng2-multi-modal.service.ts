@@ -18,29 +18,34 @@ import { Ng2MultiModalComponent } from "./ng2-multi-modal.component";
 import { DockComponent } from "./components/dock/dock.component";
 
 export interface ModalConfig {
-  title?: InputSignal<string | TemplateRef<any>>;
   content: TemplateRef<any>;
-  width?: ModelSignal<number>;
-  height?: ModelSignal<number>;
-  minWidth?: InputSignal<number>;
-  minHeight?: InputSignal<number>;
+  title?: InputSignal<string | TemplateRef<any>>;
+  icon?: InputSignal<string | TemplateRef<any> | null>;
   align?: InputSignal<"leftTop" | "rightTop" | "leftBottom" | "rightBottom">;
-  offsetY?: ModelSignal<number>;
-  offsetX?: ModelSignal<number>;
-  zIndex?: ModelSignal<number>;
   bodyStyle?: InputSignal<{
     [key: string]: any;
   }>;
-  maximized?: ModelSignal<boolean>;
-  icon?: InputSignal<string | TemplateRef<any> | null>;
-  draggable?: ModelSignal<boolean>;
-  resizable?: InputSignal<boolean>;
   closeOnNavigation?: InputSignal<boolean>;
-  outOfBounds?: InputSignal<boolean>;
   closable?: InputSignal<boolean>;
+  minHeight?: InputSignal<number>;
+  minWidth?: InputSignal<number>;
+  maximizable?: InputSignal<boolean>;
+  minimizable?: InputSignal<boolean>;
+  resizable?: InputSignal<boolean>;
+  outOfBounds?: InputSignal<boolean>;
+  loadingTip?: InputSignal<string | TemplateRef<any>>;
+  height?: ModelSignal<number>;
+  width?: ModelSignal<number>;
+  zIndex?: ModelSignal<number>;
+  offsetY?: ModelSignal<number>;
+  offsetX?: ModelSignal<number>;
+  loading?: ModelSignal<boolean>;
   theme?: ModelSignal<"light" | "dark">;
+  draggable?: ModelSignal<boolean>;
+  contentScrollable?: ModelSignal<boolean>;
+  minimized?: ModelSignal<boolean>;
+  maximized?: ModelSignal<boolean>;
 }
-
 @Injectable({ providedIn: 'root' })
 export class Ng2MultiModalService {
   private unsubscribe$ = new Subject<void>();

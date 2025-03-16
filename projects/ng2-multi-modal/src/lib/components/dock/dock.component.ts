@@ -18,7 +18,9 @@ import { StringTemplateOutletDirective } from "../../directive/string-template-o
                    (click)="restore(dock)"
                    [title]="dock.title()">
                   <ng-container *stringTemplateOutlet="dock.icon()">
+                    @if (dock.icon()) {
                       <img class="icon" draggable="false" [src]="dock.icon()" alt="icon"/>
+                    }
                   </ng-container>
                   <ng-container *stringTemplateOutlet="dock.title()">{{ dock.title() }}</ng-container>
                   <close-icon (click)="$event.stopPropagation(); close(dock)"/>
@@ -67,7 +69,7 @@ export class DockComponent {
   readonly docks = signal<Ng2MultiModalComponent[]>([]);
 
   readonly themeSuffix = computed(() =>
-    this.windowService.dockTheme() === 'dark' ? '-dark' : ''
+    (this.windowService.dockTheme() === 'dark' ? '-dark' : '')
   );
 
   restore(win: Ng2MultiModalComponent) {

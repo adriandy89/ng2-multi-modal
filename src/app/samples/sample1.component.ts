@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, viewChild } from '@angular/core';
+import { Component, effect, model, OnInit, TemplateRef, viewChild } from '@angular/core';
 import { Ng2MultiModalComponent } from "../../../projects/ng2-multi-modal/src/lib/ng2-multi-modal.component";
 import { Ng2MultiModalService } from "../../../projects/ng2-multi-modal/src/lib/ng2-multi-modal.service";
 
@@ -7,6 +7,7 @@ import { Ng2MultiModalService } from "../../../projects/ng2-multi-modal/src/lib/
   template: `
     <div class="body">
       <button (click)="openModal()">open modal</button>
+      <button (click)="toggleTheme()">toggle theme</button>
       <ng-template #tpl>
         this is modal x
       </ng-template>
@@ -21,9 +22,7 @@ import { Ng2MultiModalService } from "../../../projects/ng2-multi-modal/src/lib/
   standalone: true
 })
 export class Sample1Component implements OnInit {
-  constructor(private _modal: Ng2MultiModalService) {
-  }
-
+  readonly theme = model<'light' | 'dark'>('dark');
   // @ViewChild('tpl', { static: true }) tpl!: TemplateRef<any>;
   tpl = viewChild.required('tpl', {
     read: TemplateRef,
@@ -34,13 +33,24 @@ export class Sample1Component implements OnInit {
       modal: Ng2MultiModalComponent | null,
       visible: boolean,
     };
-  } = {}
-  count = 3;
+  } = {};
+
+  constructor(private _modal: Ng2MultiModalService) {
+    effect(() => {
+      // toggle theme
+      console.log(this.theme());
+      this._modal.dockTheme.set(this.theme());
+    });
+  }
+
+  toggleTheme() {
+    this.theme.update(prev => (prev === 'light' ? 'dark' : 'light'));
+  }
 
   openModal() {
-    this._modal.dockTheme.set('dark');
     this._modal.create({
       content: this.tpl(),
+      theme: this.theme
     }).then((modal: Ng2MultiModalComponent) => {
       const key = modal.modalId();
       this.modals[key] = {
@@ -58,6 +68,7 @@ export class Sample1Component implements OnInit {
   ngOnInit(): void {
     this._modal.create({
       content: this.tpl(),
+      theme: this.theme
     }).then((modals: Ng2MultiModalComponent) => {
       this.modals[modals.modalId()] = {
         modal: modals,
@@ -71,6 +82,7 @@ export class Sample1Component implements OnInit {
     });
     this._modal.create({
       content: this.tpl(),
+      theme: this.theme
     }).then((win: Ng2MultiModalComponent) => {
       this.modals[win.modalId()] = {
         modal: win,

@@ -100,14 +100,11 @@ export class Ng2MultiModalComponent implements AfterViewInit, OnDestroy {
   readonly onSelected = output<string>();
   readonly onMove = output<ModalSize>();
 
-  constructor(private modalService: Ng2MultiModalService) {
-  }
+  constructor(private modalService: Ng2MultiModalService) { }
 
   get language() {
     return this.modalService?.language() || 'en';
   }
-
-  readonly themeSuffixSignal = computed(() => this.theme() === 'dark' ? '-dark' : '');
 
   readonly windowSizeSignal = computed(() => ({
     offsetX: this.offsetX(),
