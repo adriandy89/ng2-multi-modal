@@ -1,5 +1,5 @@
 <div
-  [ngClass]="['ng-window', 'ng-window-theme' + themeSuffix]"
+  [ngClass]="['ng-modal', 'ng-modal-theme' + themeSuffixSignal()]"
   [hidden]="loading()"
   [ngStyle]="position()"
   [style.width.px]="width()"
@@ -9,10 +9,10 @@
   [style.display]="display()"
 ></div>
 <div
-  [class]="'ng-window ng-window-theme' + themeSuffix"
+  [class]="'ng-modal ng-modal-theme' + themeSuffixSignal()"
   [hidden]="loading()"
   [ngClass]="{
-    selected: selected(),
+    selected: selectedSignal(),
     minimized: minimized(),
     maximized: maximized()
   }"
@@ -72,14 +72,14 @@
     [ngClass]="contentScrollable() ? 'no-scroll' : ''"
     [ngStyle]="bodyStyle()"
   >
-    <ng-container *stringTemplateOutlet="content">{{ content }}</ng-container>
+    <ng-container *stringTemplateOutlet="content">{{ content() }}</ng-container>
     <ng-content></ng-content>
   </div>
 </div>
 
 <ng-container *stringTemplateOutlet="loadingTip()">
   <div
-    [class]="'window-loading' + themeSuffix"
+    [class]="'window-loading' + themeSuffixSignal()"
     [ngStyle]="position()"
     *ngIf="loading()"
   >

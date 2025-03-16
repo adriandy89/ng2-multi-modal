@@ -28,7 +28,6 @@ export interface ModalConfig {
   offsetY?: ModelSignal<number>;
   offsetX?: ModelSignal<number>;
   zIndex?: ModelSignal<number>;
-  titleStyle?: any;
   bodyStyle?: InputSignal<{
     [key: string]: any;
   }>;
@@ -63,8 +62,8 @@ export class Ng2MultiModalService {
     });
   }
 
-  dockTheme: 'light' | 'dark' = 'light';
-  language: 'es' | 'en' = 'en';
+  readonly dockTheme = signal<'light' | 'dark'>('light');
+  readonly language = signal<'es' | 'en'>('en');
 
   maxZIndex: number = 0;
   instances: ComponentRef<Ng2MultiModalComponent>[] = [];
@@ -86,7 +85,7 @@ export class Ng2MultiModalService {
   }
 
   addMinimizeItem(windowComponent: Ng2MultiModalComponent) {
-    this.dockComponentRef!.instance.docks.push(windowComponent);
+    this.dockComponentRef!.instance.docks.update(prev => [...prev, windowComponent]);
   }
 
   createDock() {
@@ -127,42 +126,50 @@ export class Ng2MultiModalService {
     this.createDock();
     this.createWrapper();
     return new Promise(resolve => {
-      const componentRef: any = createComponent(Ng2MultiModalComponent, {
+      const componentRef = createComponent(Ng2MultiModalComponent, {
         environmentInjector: this._environmentInjector,
         elementInjector: this._injector
       });
 
-      //if the options.left > window.innerWidth, then set left = window.innerWidth - options.width
+      // Position adjustment for viewport bounds
       if (options.offsetX && options.width && options.offsetX() + options.width() > window.innerWidth) {
         options.offsetX.set(window.innerWidth - options.width() - 10);
       }
-      //if the options.top > window.innerHeight, then set top = window.innerHeight - options.height
       if (options.offsetY && options.height && options.offsetY() + options.height() > window.innerHeight) {
         options.offsetY.set(window.innerHeight - options.height() - 30);
       }
 
-      for (const i in options) {
-        componentRef.instance[i] = (options as any)[i];
+      // Apply options to component
+      for (const [key, value] of Object.entries(options) as [keyof ModalConfig, any][]) {
+        if (key in componentRef.instance) {
+          (componentRef.instance as any)[key] = value;
+        }
       }
 
-      if (componentRef.instance.zIndex <= this.maxZIndex) {
-        componentRef.instance.zIndex = this.maxZIndex = componentRef.instance.zIndex++;
-      }
-      this.selectedWindow.set(componentRef.instance.modalId());
-      componentRef.changeDetectorRef.detectChanges();
+      // Always increment maxZIndex to ensure this window is on top
+      this.maxZIndex += 1;
+      componentRef.instance.zIndex.set(this.maxZIndex);
+
       this._appRef.attachView(componentRef.hostView);
       this._appendToPage(componentRef.location.nativeElement, document.querySelector('#ng-modal-wrapper') as HTMLElement);
-      this.instances = [
-        ...this.instances,
-        componentRef
-      ]
+
+      // Add to instances array
+      this.instances = [...this.instances, componentRef];
+
+      // Set as selected window AFTER adding it to instances
+      this.selectedWindow.set(componentRef.instance.modalId());
+      componentRef.changeDetectorRef.detectChanges();
+
       componentRef.instance.onClose.subscribe((modalId: string) => {
-        this.dockComponentRef!.instance.docks = this.dockComponentRef!.instance.docks.filter(win => win !== componentRef.instance);
+        this.dockComponentRef!.instance.docks.update(prev =>
+          prev.filter(win => win !== componentRef.instance)
+        );
         this.destroy(modalId);
         if (this.selectedWindow() === modalId) {
           this.selectedWindow.set(null);
         }
       });
+
       resolve(componentRef.instance);
     });
   }

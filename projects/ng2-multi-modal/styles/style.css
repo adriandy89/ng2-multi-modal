@@ -75,7 +75,7 @@
   background: 0 0;
 }
 
-.ng-window-dock {
+.ng-modal-dock {
   position: fixed;
   right: 160px;
   bottom: 5px;
@@ -91,7 +91,7 @@
     margin-right: 4px;
   }
 
-  .ng-window-dock-item {
+  .ng-modal-dock-item {
     height: 40px;
     padding: 0 10px;
     max-width: 200px;
@@ -118,7 +118,7 @@
   }
 }
 
-.ng-window {
+.ng-modal {
   position: fixed;
   background: var(--window-bg-color);
   border-radius: var(--window-border-radius);
@@ -141,7 +141,7 @@
   }
 
   &.minimized {
-    #ng-window-back-drop {
+    #ng-modal-back-drop {
       display: none;
     }
 
@@ -332,7 +332,7 @@
   animation: popup 0.2s cubic-bezier(0.3, 1, 0.3, 1) backwards;
 }
 
-.ng-window-back-drop {
+.ng-modal-back-drop {
   position: fixed;
   margin: 0;
   padding: 0;

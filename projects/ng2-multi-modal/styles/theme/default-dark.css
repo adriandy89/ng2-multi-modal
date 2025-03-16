@@ -3,7 +3,7 @@
 
 /* ==========The following is the custom theme variable area==========*/
 /* window and window title bar*/
-.ng-window-theme-dark {
+.ng-modal-theme-dark {
     --window-bg-color: #142138;
     --window-title-bar-bg-color: #142138;
     --window-title-bar-color: #FFF;

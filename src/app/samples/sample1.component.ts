@@ -14,8 +14,8 @@ import { Ng2MultiModalService } from "../../../projects/ng2-multi-modal/src/lib/
   `,
   styles: [`
     .body {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
     }
   `],
   standalone: true
@@ -38,7 +38,7 @@ export class Sample1Component implements OnInit {
   count = 3;
 
   openModal() {
-    this._modal.dockTheme = 'dark';
+    this._modal.dockTheme.set('dark');
     this._modal.create({
       content: this.tpl,
     }).then((modal: Ng2MultiModalComponent) => {

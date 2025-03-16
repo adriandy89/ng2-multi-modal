@@ -41,29 +41,6 @@ interface ModalSize {
 export class Ng2MultiModalComponent implements AfterViewInit {
   readonly modalId = signal('window' + Math.floor(Math.random() * 1000000));
   readonly titleHeight = signal(0);
-  readonly title = input<string | TemplateRef<any>>('Modal Name');
-  readonly icon = input<string | TemplateRef<any> | null>(null);
-  readonly align = input<'leftTop' | 'rightTop' | 'leftBottom' | 'rightBottom'>('leftTop');
-  readonly bodyStyle = input<{ [key: string]: any }>({});
-  readonly zIndex = model(0);
-  readonly closeOnNavigation = input(false);
-  readonly closable = input(true);
-  @Input() content!: TemplateRef<any>;
-  readonly width = model(300);
-  readonly height = model(300);
-  readonly minWidth = input(175);
-  readonly minHeight = input(100);
-  readonly offsetY = model(200);
-  readonly offsetX = model(200);
-  readonly loading = model(true);
-  readonly theme = model<'light' | 'dark'>('light');
-  readonly maximizable = input(true);
-  readonly minimizable = input(true);
-  readonly resizable = input(true);
-  readonly draggable = model(true);
-  readonly outOfBounds = input(false);
-  readonly loadingTip = input<string | TemplateRef<any>>(this.getLocaleText('loading'));
-  readonly contentScrollable = model(false);
   readonly position = signal<{ [key: string]: string }>({});
   readonly dragging = signal(false);
   readonly windowMouseEnterFlag = signal(false);
@@ -71,8 +48,8 @@ export class Ng2MultiModalComponent implements AfterViewInit {
   readonly windowMouseLeaveFlag = signal(true);
   readonly clickedX = signal(0);
   readonly clickedY = signal(0);
-  mouseEvent!: MouseEvent;
-  mouseEntered!: MouseEvent;
+  readonly mouseEventSignal = signal<MouseEvent | null>(null);
+  readonly mouseEnteredSignal = signal<MouseEvent | null>(null);
   readonly borderWidth = signal(4);
   readonly cursorStyle = signal('default');
   readonly display = signal('none');
@@ -86,16 +63,36 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     isRight: false,
     isTop: false,
     isBottom: false
-  })
-  // @Output('onReady') onReady = new EventEmitter<Ng2MultiModalComponent>();
-  // @Output('onClose') onClose = new EventEmitter<string>();
-  // @Output('onResize') onResize = new EventEmitter<ModalSize>();
-  // @Output('onMaximize') onMaximize = new EventEmitter<ModalSize>();
-  // @Output('onMaximizeRestore') onMaximizeRestore = new EventEmitter<ModalSize>();
-  // @Output('onMinimize') onMinimize = new EventEmitter<ModalSize>();
-  // @Output('onMinimizeRestore') onMinimizeRestore = new EventEmitter<ModalSize>();
-  // @Output('onSelected') onSelected = new EventEmitter<string>();
-  // @Output('onMove') onMove = new EventEmitter<ModalSize>();
+  });
+  readonly propertyBeforeMaximize = signal<ModalSize | null>(null);
+  // Input signals
+  readonly title = input<string | TemplateRef<any>>('Modal Name');
+  readonly icon = input<string | TemplateRef<any> | null>(null);
+  readonly align = input<'leftTop' | 'rightTop' | 'leftBottom' | 'rightBottom'>('leftTop');
+  readonly bodyStyle = input<{ [key: string]: any }>({});
+  readonly closeOnNavigation = input(false);
+  readonly closable = input(true);
+  readonly content = input<TemplateRef<any>>();
+  readonly minHeight = input(100);
+  readonly minWidth = input(175);
+  readonly maximizable = input(true);
+  readonly minimizable = input(true);
+  readonly resizable = input(true);
+  readonly outOfBounds = input(false);
+  readonly loadingTip = input<string | TemplateRef<any>>(this.getLocaleText('loading'));
+  // Model signals
+  readonly height = model(300);
+  readonly width = model(300);
+  readonly zIndex = model(0);
+  readonly offsetY = model(200);
+  readonly offsetX = model(200);
+  readonly loading = model(true);
+  readonly theme = model<'light' | 'dark'>('light');
+  readonly draggable = model(true);
+  readonly contentScrollable = model(false);
+  readonly minimized = model(false);
+  readonly maximized = model(false);
+  // Output events
   readonly onReady = output<Ng2MultiModalComponent>();
   readonly onClose = output<string>();
   readonly onResize = output<ModalSize>();
@@ -105,53 +102,55 @@ export class Ng2MultiModalComponent implements AfterViewInit {
   readonly onMinimizeRestore = output<ModalSize>();
   readonly onSelected = output<string>();
   readonly onMove = output<ModalSize>();
-  readonly minimized = model(false);
-  readonly maximized = model(false);
-  readonly propertyBeforeMaximize = signal<ModalSize | null>(null);
 
   constructor(private modalService: Ng2MultiModalService) {
   }
 
-  get themeSuffix() {
-    return this.theme() === 'dark' ? '-dark' : '';
-  }
-
   get language() {
-    return this.modalService?.language || 'en';
+    return this.modalService?.language() || 'en';
   }
 
-  get windowSize(): ModalSize {
-    return {
-      offsetX: this.offsetX(),
-      offsetY: this.offsetY(),
-      align: this.align(),
-      width: this.width(),
-      height: this.height()
-    }
-  }
+  readonly themeSuffixSignal = computed(() => this.theme() === 'dark' ? '-dark' : '');
 
-  get left() {
-    return (this.align() === 'leftTop' || this.align() === 'leftBottom' ? this.offsetX() : window.innerWidth - this.width() - this.offsetX());
-  }
+  readonly windowSizeSignal = computed(() => ({
+    offsetX: this.offsetX(),
+    offsetY: this.offsetY(),
+    align: this.align(),
+    width: this.width(),
+    height: this.height()
+  }));
 
-  get right() {
-    return (this.align() === 'rightTop' || this.align() === 'rightBottom' ? window.innerWidth - this.offsetX() : this.width() + this.offsetX());
-  }
+  readonly leftSignal = computed(() =>
+    (this.align() === 'leftTop' || this.align() === 'leftBottom') ?
+      this.offsetX() : window.innerWidth - this.width() - this.offsetX()
+  );
 
-  get top() {
-    return (this.align() === 'leftTop' || this.align() === 'rightTop' ? this.offsetY() : window.innerHeight - this.height() - this.offsetY());
-  }
+  readonly rightSignal = computed(() =>
+    (this.align() === 'rightTop' || this.align() === 'rightBottom') ?
+      window.innerWidth - this.offsetX() : this.width() + this.offsetX()
+  );
 
-  get bottom() {
-    return (this.align() === 'leftBottom' || this.align() === 'rightBottom' ? window.innerHeight - this.offsetY() : this.height() + this.offsetY());
-  }
+  readonly topSignal = computed(() =>
+    (this.align() === 'leftTop' || this.align() === 'rightTop') ?
+      this.offsetY() : window.innerHeight - this.height() - this.offsetY()
+  );
 
-  get selected() {
-    return computed(() => this.modalService.selectedWindow() === this.modalId());
-  }
+  readonly bottomSignal = computed(() =>
+    (this.align() === 'leftBottom' || this.align() === 'rightBottom') ?
+      window.innerHeight - this.offsetY() : this.height() + this.offsetY()
+  );
 
+  readonly selectedSignal = computed(() => this.modalService.selectedWindow() === this.modalId());
+
+  // Create a signal for the element
+  readonly titleBarElement = signal<ElementRef | null>(null);
+
+  // Update the setter
   @ViewChild('titleBar', { static: false }) set titleBar(titleBar: ElementRef) {
-    this.titleHeight.set(titleBar.nativeElement.offsetHeight);
+    this.titleBarElement.set(titleBar);
+    if (titleBar) {
+      this.titleHeight.set(titleBar.nativeElement.offsetHeight);
+    }
   }
 
   getLocaleText(text: 'loading' | 'close' | 'maximize' | 'minimize' | 'windowMode') {
@@ -221,7 +220,7 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     if (!this.draggable() || this.maximized()) {
       return;
     }
-    this.mouseEvent = event;
+    this.mouseEventSignal.set(event);
     if (this.dragging()) {
       // Replace when(this.align) with switch or if/else
       let newOffsetX = 0;
@@ -283,14 +282,14 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     let x = event.clientX;
     let y = event.clientY;
 
-    let leftBorderX = Math.abs(this.left - x) <= this.borderWidth();
-    let rightBorderX = Math.abs(this.left + this.width() - x) <= this.borderWidth();
-    let rightLeftBorderY = (y > this.top) && (y < (this.top + this.height()));
+    let leftBorderX = Math.abs(this.leftSignal() - x) <= this.borderWidth();
+    let rightBorderX = Math.abs(this.leftSignal() + this.width() - x) <= this.borderWidth();
+    let rightLeftBorderY = (y > this.topSignal()) && (y < (this.topSignal() + this.height()));
 
 
-    let topBorderY = Math.abs(this.top - y) <= this.borderWidth();
-    let bottomBorderY = Math.abs(this.top + this.height() - y) <= this.borderWidth();
-    let topBottomBorderX = x > this.left && x < this.left + this.width();
+    let topBorderY = Math.abs(this.topSignal() - y) <= this.borderWidth();
+    let bottomBorderY = Math.abs(this.topSignal() + this.height() - y) <= this.borderWidth();
+    let topBottomBorderX = x > this.leftSignal() && x < this.leftSignal() + this.width();
 
     if (this.resizable()) {
       if (leftBorderX && bottomBorderY) {
@@ -365,35 +364,35 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     }
     if (this.border().isLeft) {
       if (this.align().toLocaleLowerCase().includes('left')) {
-        let r = this.right;
+        let r = this.rightSignal();
         this.updateOffsetX(event.clientX);
-        this.width.set(r - this.left);
+        this.width.set(r - this.leftSignal());
       } else {
-        this.width.set(this.right - event.clientX);
+        this.width.set(this.rightSignal() - event.clientX);
       }
     }
     if (this.border().isRight) {
       if (this.align().toLocaleLowerCase().includes('left')) {
-        this.width.update(prev => prev + event.clientX - this.right);
+        this.width.update(prev => prev + event.clientX - this.rightSignal());
       } else {
-        this.width.update(prev => prev + event.clientX - this.right);;
+        this.width.update(prev => prev + event.clientX - this.rightSignal());;
         this.updateOffsetX(Math.max(window.innerWidth - event.clientX, 0));
       }
     }
     if (this.border().isTop) {
       if (this.align().toLocaleLowerCase().includes('top')) {
-        let b = this.bottom;
+        let b = this.bottomSignal();
         this.updateOffsetY(Math.max(event.clientY, 0));
-        this.height.set(b - this.top);
+        this.height.set(b - this.topSignal());
       } else {
-        this.height.set(this.bottom - event.clientY);
+        this.height.set(this.bottomSignal() - event.clientY);
       }
     }
     if (this.border().isBottom) {
       if (this.align().toLocaleLowerCase().includes('top')) {
-        this.height.update(prev => prev + event.clientY - this.bottom);
+        this.height.update(prev => prev + event.clientY - this.bottomSignal());
       } else {
-        this.height.update(prev => prev + event.clientY - this.bottom);
+        this.height.update(prev => prev + event.clientY - this.bottomSignal());
         this.updateOffsetY(Math.max(window.innerHeight - event.clientY, 0));
       }
     }
@@ -413,7 +412,7 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     if (this.offsetY() < 0) {
       this.updateOffsetY(0);
     }
-    this.onResize.emit(this.windowSize);
+    this.onResize.emit(this.windowSizeSignal());
   }
 
   titleBarMouseDown(event: MouseEvent) {
@@ -421,8 +420,8 @@ export class Ng2MultiModalComponent implements AfterViewInit {
       return;
     }
     this.dragging.set(true);
-    this.clickedX.set(event.clientX - this.left);
-    this.clickedY.set(event.clientY - this.top);
+    this.clickedX.set(event.clientX - this.leftSignal());
+    this.clickedY.set(event.clientY - this.topSignal());
   }
 
   @HostListener('document:mouseup', ['$event']) titleBarMouseUp(event: MouseEvent) {
@@ -434,7 +433,7 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     if (!this.draggable()) {
       return;
     }
-    this.mouseEntered = event;
+    this.mouseEnteredSignal.set(event);
     this.windowMouseEnterFlag.set(true);
     this.windowMouseLeaveFlag.set(false);
   }
@@ -475,9 +474,10 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     if (this.minimized()) {
       this.minimized.set(false);
       this.display.set('block');
-      this.modalService.dockComponentRef!.instance.docks =
-        this.modalService.dockComponentRef!.instance.docks.filter(win => win != this);
-      this.onMinimizeRestore.emit(this.windowSize);
+      // this.modalService.dockComponentRef!.instance.docks =
+      // this.modalService.dockComponentRef!.instance.docks.filter(win => win != this);
+      this.modalService.dockComponentRef!.instance.docks.update(prev => prev.filter(win => win !== this));
+      this.onMinimizeRestore.emit(this.windowSizeSignal());
     } else {
       this.toggleBodyScrollable(true);
 
@@ -486,9 +486,9 @@ export class Ng2MultiModalComponent implements AfterViewInit {
         this.display.set('none');
       }, 200);
       this.modalService.addMinimizeItem(this);
-      this.onMinimize.emit(this.windowSize);
+      this.onMinimize.emit(this.windowSizeSignal());
     }
-    this.onResize.emit(this.windowSize);
+    this.onResize.emit(this.windowSizeSignal());
   }
 
   maximize(): Promise<boolean> {
@@ -509,8 +509,8 @@ export class Ng2MultiModalComponent implements AfterViewInit {
         this.updateOffsetY(offsetY);
         this.draggable.set(true);
 
-        this.onResize.emit(this.windowSize);
-        this.onMaximizeRestore.emit(this.windowSize);
+        this.onResize.emit(this.windowSizeSignal());
+        this.onMaximizeRestore.emit(this.windowSizeSignal());
         resolve(true);
       } else {
         // Save current state before maximizing
@@ -541,8 +541,8 @@ export class Ng2MultiModalComponent implements AfterViewInit {
           this.updateOffsetY(0);
         };
 
-        this.onResize.emit(this.windowSize);
-        this.onMaximize.emit(this.windowSize);
+        this.onResize.emit(this.windowSizeSignal());
+        this.onMaximize.emit(this.windowSizeSignal());
         resolve(true);
       }
     });
@@ -556,7 +556,7 @@ export class Ng2MultiModalComponent implements AfterViewInit {
     if (this.offsetX() + this.width() > window.innerWidth) {
       this.updateOffsetX(Math.max(window.innerWidth - this.width(), 0));
     }
-    this.onResize.emit(this.windowSize);
+    this.onResize.emit(this.windowSizeSignal());
   }
 
   toggleBodyScrollable(scrollable = true) {

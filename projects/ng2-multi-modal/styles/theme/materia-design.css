@@ -33,14 +33,13 @@
     --content-radius: 0 0 4px 4px;
     --body-drag-area-width: 3px;
 
-// selected window and title bar --selected-window-title-bar-color: #000;
+    --selected-window-title-bar-color: #000;
     --selected-window-title-bar-bg-color: #FFF;
     --selected-window-box-shadow: 5px 10px 5px rgba(0, 0, 0, 0.46);
 
-// back drop --back-drop-bg-color: #999;
+    --back-drop-bg-color: #999;
 
-
-// icons --win-icon-bg-color: #FFF;
+    --win-icon-bg-color: #FFF;
     --win-icon-inset: 8px 4px auto auto;
     --win-icon-padding: 6px;
     --win-icon-svg-width: 10px;

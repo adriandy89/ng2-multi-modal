@@ -11,6 +11,6 @@ import { Ng2MultiModalService } from '../../projects/ng2-multi-modal/src/public-
 export class AppComponent {
   title = 'proyect-multi-modal';
   constructor(private _modal: Ng2MultiModalService) {
-    this._modal.language = 'en';
+    this._modal.language.set('en');
   }
 }

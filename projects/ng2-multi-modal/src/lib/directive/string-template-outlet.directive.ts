@@ -1,107 +1,88 @@
-/**
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/LICENSE
- */
-
 import {
-    Directive,
-    EmbeddedViewRef,
-    Input,
-    OnChanges,
-    SimpleChange,
-    SimpleChanges,
-    TemplateRef,
-    ViewContainerRef
+  Directive,
+  EmbeddedViewRef,
+  TemplateRef,
+  ViewContainerRef,
+  input,
+  effect,
+  untracked
 } from '@angular/core';
 
 @Directive({
-    selector: '[stringTemplateOutlet]',
-    exportAs: 'stringTemplateOutlet',
-    standalone: true
+  selector: '[stringTemplateOutlet]',
+  exportAs: 'stringTemplateOutlet',
+  standalone: true
 })
-export class StringTemplateOutletDirective<_T = unknown> implements OnChanges {
-    private embeddedViewRef: EmbeddedViewRef<any> | null = null;
-    private context = new StringTemplateOutletContext();
-    @Input() stringTemplateOutletContext: any | null = null;
-    @Input() stringTemplateOutlet: any | TemplateRef<any> = null;
+export class StringTemplateOutletDirective<_T = unknown> {
+  private embeddedViewRef: EmbeddedViewRef<any> | null = null;
+  private context = new StringTemplateOutletContext();
 
-    static ngTemplateContextGuard<T>(
-        _dir: StringTemplateOutletDirective<T>,
-        _ctx: any
-    ): _ctx is StringTemplateOutletContext {
-        return true;
-    }
+  // Using Angular 19's input() function instead of @Input decorator
+  readonly stringTemplateOutletContext = input<any | null>(null);
+  readonly stringTemplateOutlet = input<any | TemplateRef<any>>(null);
 
-    private recreateView(): void {
-        this.viewContainer.clear();
-        const isTemplateRef = this.stringTemplateOutlet instanceof TemplateRef;
-        const templateRef = (isTemplateRef ? this.stringTemplateOutlet : this.templateRef) as any;
-        this.embeddedViewRef = this.viewContainer.createEmbeddedView(
-            templateRef,
-            isTemplateRef ? this.stringTemplateOutletContext : this.context
-        );
-    }
+  static ngTemplateContextGuard<T>(
+    _dir: StringTemplateOutletDirective<T>,
+    _ctx: any
+  ): _ctx is StringTemplateOutletContext {
+    return true;
+  }
 
-    private updateContext(): void {
-        const isTemplateRef = this.stringTemplateOutlet instanceof TemplateRef;
-        const newCtx = isTemplateRef ? this.stringTemplateOutletContext : this.context;
-        const oldCtx = this.embeddedViewRef!.context as any;
-        if (newCtx) {
-            for (const propName of Object.keys(newCtx)) {
-                oldCtx[propName] = newCtx[propName];
-            }
+  constructor(private viewContainer: ViewContainerRef, private templateRef: TemplateRef<any>) {
+    // Effect that reacts to changes in inputs
+    effect(() => {
+      // Read the current values of inputs
+      const outlet = this.stringTemplateOutlet();
+      const _ = this.stringTemplateOutletContext();
+
+      // Update the implicit context when outlet changes
+      if (outlet !== null) {
+        this.context.$implicit = outlet;
+      }
+
+      // Determine if we should recreate the view
+      untracked(() => {
+        const isNewOutletTemplate = outlet instanceof TemplateRef;
+
+        // Check if the embedded view exists and if the template type changed
+        const shouldRecreate =
+          !this.embeddedViewRef ||
+          (this.embeddedViewRef && isNewOutletTemplate);
+
+        if (shouldRecreate) {
+          this.recreateView();
+        } else if (this.embeddedViewRef) {
+          this.updateContext();
         }
+      });
+    });
+  }
+
+  private recreateView(): void {
+    this.viewContainer.clear();
+    const isTemplateRef = this.stringTemplateOutlet() instanceof TemplateRef;
+    const templateRef = (isTemplateRef ? this.stringTemplateOutlet() : this.templateRef) as any;
+    this.embeddedViewRef = this.viewContainer.createEmbeddedView(
+      templateRef,
+      isTemplateRef ? this.stringTemplateOutletContext() : this.context
+    );
+  }
+
+  private updateContext(): void {
+    if (!this.embeddedViewRef) return;
+
+    const isTemplateRef = this.stringTemplateOutlet() instanceof TemplateRef;
+    const newCtx = isTemplateRef ? this.stringTemplateOutletContext() : this.context;
+    const oldCtx = this.embeddedViewRef.context as any;
+
+    if (newCtx) {
+      for (const propName of Object.keys(newCtx)) {
+        oldCtx[propName] = newCtx[propName];
+      }
     }
-
-    constructor(private viewContainer: ViewContainerRef, private templateRef: TemplateRef<any>) {}
-
-    ngOnChanges(changes: SimpleChanges): void {
-        const { stringTemplateOutletContext, stringTemplateOutlet } = changes;
-        const shouldRecreateView = (): boolean => {
-            let shouldOutletRecreate = false;
-            if (stringTemplateOutlet) {
-                if (stringTemplateOutlet.firstChange) {
-                    shouldOutletRecreate = true;
-                } else {
-                    const isPreviousOutletTemplate = stringTemplateOutlet.previousValue instanceof TemplateRef;
-                    const isCurrentOutletTemplate = stringTemplateOutlet.currentValue instanceof TemplateRef;
-                    shouldOutletRecreate = isPreviousOutletTemplate || isCurrentOutletTemplate;
-                }
-            }
-            const hasContextShapeChanged = (ctxChange: SimpleChange): boolean => {
-                const prevCtxKeys = Object.keys(ctxChange.previousValue || {});
-                const currCtxKeys = Object.keys(ctxChange.currentValue || {});
-                if (prevCtxKeys.length === currCtxKeys.length) {
-                    for (const propName of currCtxKeys) {
-                        if (prevCtxKeys.indexOf(propName) === -1) {
-                            return true;
-                        }
-                    }
-                    return false;
-                } else {
-                    return true;
-                }
-            };
-            const shouldContextRecreate =
-                stringTemplateOutletContext && hasContextShapeChanged(stringTemplateOutletContext);
-            return shouldContextRecreate || shouldOutletRecreate;
-        };
-
-        if (stringTemplateOutlet) {
-            this.context.$implicit = stringTemplateOutlet.currentValue;
-        }
-
-        const recreateView = shouldRecreateView();
-        if (recreateView) {
-            /** recreate view when context shape or outlet change **/
-            this.recreateView();
-        } else {
-            /** update context **/
-            this.updateContext();
-        }
-    }
+  }
 }
 
 export class StringTemplateOutletContext {
-    public $implicit: any;
+  public $implicit: any;
 }
