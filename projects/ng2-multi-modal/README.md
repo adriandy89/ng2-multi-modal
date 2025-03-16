@@ -25,17 +25,11 @@ Latest version available for each version of Angular
 
 ## Usage
 
-Import `ng2-multi-modal` module in your Angular app:
+Then add `Ng2MultiModalComponent` and `Ng2MultiModalService` to your standalone app's component imports:
 
 ```typescript
-import { Ng2MultiModalModule } from "ng2-multi-modal";
-```
-Then add `Ng2MultiModalModule` to your app's component imports:
-
-```typescript
-  imports: [
-      Ng2MultiModalModule,
-  ]
+    imports: [Ng2MultiModalComponent],
+    providers: [Ng2MultiModalService]
 ```
 
 Required for animations:
