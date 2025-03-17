@@ -21,7 +21,7 @@ Latest version available for each version of Angular
 
 | ng2-multi-modal | Angular     |
 |-----------------| ------------|
-| 1.0.2           | 19.0.0+     |
+| 1.0.3           | 19.0.0+     |
 
 ## Usage
 
@@ -50,37 +50,49 @@ import { Ng2MultiModalService } from "ng2-multi-modal";
     templateUrl: "./app.component.html",
     styleUrls: ["./app.component.scss"],
     standalone: true,
+    imports: [Ng2MultiModalComponent],
+    providers: [Ng2MultiModalService]
 })
 export class AppComponent {
-    constructor(private _modal: Ng2MultiModalService) {}
+  readonly theme = model<'light' | 'dark'>('dark');
+  tpl = viewChild.required('tpl', {
+    read: TemplateRef,
+  });
 
-    modals: {
-        [key: string]: {
-            modal: Ng2MultiModalComponent | null,
-            visible: boolean,
-        }
-    } = {};
+  modals: {
+    [key: string]: {
+      modal: Ng2MultiModalComponent | null,
+      visible: boolean,
+    };
+  } = {};
 
-    openModal(template: TemplateRef<any>) {
-        this._modal.create({
-            content: template,
-            theme: this.theme, // ModelSignal<'light' | 'dark'>
-            title: 'My Modal',
-            width: 800,
-            height: 500,
-        }).then((modal: Ng2MultiModalComponent) => {
-            const key = modal.modalId();
-            this.modals[key] = {
-                modal,
-                visible: true,
-            };
-            
-            modal.onClose.subscribe(() => {
-                this.modals[key].visible = false;
-                this.modals[key].modal = null;
-            });
-        });
-    }
+  constructor(private _modal: Ng2MultiModalService) {
+    effect(() => {
+      this._modal.dockTheme.set(this.theme());
+    });
+  }
+
+  toggleTheme() {
+    this.theme.update(prev => (prev === 'light' ? 'dark' : 'light'));
+  }
+
+  openModal() {
+    this._modal.create({
+      content: this.tpl(),
+      theme: this.theme
+    }).then((modal: Ng2MultiModalComponent) => {
+      const key = modal.modalId();
+      this.modals[key] = {
+        modal,
+        visible: true,
+      };
+      modal.maximized.set(false);
+      modal.onClose.subscribe(() => {
+        this.modals[key].visible = false;
+        this.modals[key].modal = null
+      });
+    });
+  }
 }
 ```
 
