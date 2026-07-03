@@ -1,30 +1,35 @@
 {
-  "name": "proyect-multi-modal",
-  "version": "1.0.3",
+  "name": "ng2-multi-modal-workspace",
+  "version": "2.0.0",
+  "private": true,
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "start": "ng serve demo",
+    "build": "npm run build:lib",
+    "build:demo": "ng build demo",
+    "build:styles": "sass projects/ng2-multi-modal/styles:projects/ng2-multi-modal/styles --style=expanded --no-source-map",
+    "build:lib": "npm run build:styles && ng build ng2-multi-modal && node scripts/patch-dist-exports.mjs",
+    "pack:lib": "npm run build:lib && cd dist/ng2-multi-modal && npm pack",
+    "watch": "ng build ng2-multi-modal --watch --configuration development",
+    "test": "ng test ng2-multi-modal --watch=false --browsers=ChromeHeadless"
   },
-  "private": true,
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
+  },
   "dependencies": {
-    "@angular/animations": "^19.1.0",
-    "@angular/common": "^19.1.0",
-    "@angular/compiler": "^19.1.0",
-    "@angular/core": "^19.1.0",
-    "@angular/forms": "^19.1.0",
-    "@angular/platform-browser": "^19.1.0",
-    "@angular/platform-browser-dynamic": "^19.1.0",
-    "@angular/router": "^19.1.0",
+    "@angular/common": "^20.3.25",
+    "@angular/compiler": "^20.3.25",
+    "@angular/core": "^20.3.25",
+    "@angular/forms": "^20.3.25",
+    "@angular/platform-browser": "^20.3.25",
+    "@angular/router": "^20.3.25",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.6.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.1.8",
-    "@angular/cli": "^19.1.8",
-    "@angular/compiler-cli": "^19.1.0",
+    "@angular-devkit/build-angular": "^20.3.31",
+    "@angular/cli": "^20.3.31",
+    "@angular/compiler-cli": "^20.3.25",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.5.0",
     "karma": "~6.4.0",
@@ -32,7 +37,8 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "ng-packagr": "^19.2.0",
-    "typescript": "~5.7.2"
+    "ng-packagr": "^20.3.2",
+    "sass": "^1.77.0",
+    "typescript": "~5.9.3"
   }
 }

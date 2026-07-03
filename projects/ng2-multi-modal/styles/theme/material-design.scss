@@ -1,0 +1,25 @@
+/** Material-Design-flavored theme (elevated surface, colored app bar). */
+@use 'tokens';
+
+:root,
+.ng-modal-theme-light {
+  @include tokens.base-vars();
+
+  --window-border-radius: 4px;
+  --window-box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  --selected-window-box-shadow: 0 11px 15px -7px rgba(0, 0, 0, 0.2), 0 24px 38px 3px rgba(0, 0, 0, 0.14);
+
+  --window-title-bar-height: 40px;
+  --window-title-bar-bg-color: #6200ee;
+  --window-title-bar-color: #ffffff;
+  --window-title-bar-text-align: left;
+  --window-title-bar-font-weight: 500;
+  --window-title-bar-font-size: 15px;
+  --window-title-name-padding: 0 12px;
+
+  --win-icon-bg-color-hover: rgba(255, 255, 255, 0.18);
+  --close-icon-bg-color-hover: rgba(255, 255, 255, 0.28);
+  --close-icon-color-hover: #ffffff;
+  --content-radius: 0px;
+  --window-body-padding: 16px;
+}

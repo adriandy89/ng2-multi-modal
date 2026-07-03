@@ -1,0 +1,31 @@
+/**
+ * Default dark theme — overrides applied to `.ng-modal-theme-dark`.
+ * Load together with `default.css`.
+ */
+.ng-modal-theme-dark {
+  --window-bg-color: #1e1f22;
+  --window-body-bg-color: #1e1f22;
+  --window-body-color: #e6e6e6;
+  --window-box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+  --window-box-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.6);
+  --selected-window-box-shadow: 0 10px 34px rgba(0, 0, 0, 0.7);
+
+  --window-title-bar-color: #e6e6e6;
+  --window-title-bar-bg-color: #2b2d31;
+
+  --win-icon-bg-color-hover: rgba(255, 255, 255, 0.12);
+  --close-icon-bg-color-hover: #e81123;
+  --close-icon-color-hover: #ffffff;
+
+  --scrollbar-thumb: rgba(180, 180, 180, 0.4);
+  --scrollbar-thumb-hover: rgba(210, 210, 210, 0.7);
+
+  --back-drop-bg-color: rgba(0, 0, 0, 0.6);
+  --loading-bg-color: #1e1f22;
+  --loading-color: #e6e6e6;
+  --focus-ring-color: #4c9aff;
+
+  --dock-item-bg-color: #2b2d31;
+  --dock-item-color: #e6e6e6;
+  --dock-item-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}

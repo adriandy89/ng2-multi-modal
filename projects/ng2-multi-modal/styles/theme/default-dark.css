@@ -1,44 +1,27 @@
-/* File: default-dark.less*/
-/* Theme: default-dark*/
-
-/* ==========The following is the custom theme variable area==========*/
-/* window and window title bar*/
+@charset "UTF-8";
+/**
+ * Default dark theme — overrides applied to `.ng-modal-theme-dark`.
+ * Load together with `default.css`.
+ */
 .ng-modal-theme-dark {
-    --window-bg-color: #142138;
-    --window-title-bar-bg-color: #142138;
-    --window-title-bar-color: #FFF;
-    --window-title-bar-border-color: #DDD;
-    --window-box-shadow: 1px 0 7px #999;
-    --window-box-shadow-hover: 3px 3px 15px #CCC;
-    --window-body-bg-color: #142138;
-    --window-body-color: #FFF;
-
-    /*selected window title bar */
-    --selected-window-title-bar-color: #FFF;
-    --selected-window-title-bar-bg-color: #142138;
-    --selected-window-box-shadow: 5px 10px 5px rgba(0, 0, 0, 0.46);
-
-    /*back drop*/
-    --back-drop-bg-color: #999;
-
-
-    /*icons */
-    --win-icon-bg-color: #449;
-    --win-icon-border: 1px solid #66A;
-
-    --close-icon-bg-color: #EEE !important;
-    --close-icon-bg-color-hover: #fc5e5a !important;
-    --close-icon-border-hover: solid 1px #dc3b39 !important;
-
-    --maximize-icon-bg-color: #EEE !important;
-    --maximize-icon-bg-color-hover: #2ccd47 !important;
-    --maximize-icon-border-hover: solid 1px #12ad2c !important;
-
-    --maximized-icon-bg-color: #EEE !important;
-    --maximized-icon-bg-color-hover: #2ccd47 !important;
-    --maximized-icon-border-hover: solid 1px #12ad2c !important;
-
-    --minimize-icon-bg-color: #EEE !important;
-    --minimize-icon-bg-color-hover: #fbc13c !important;
-    --minimize-icon-border-hover: solid 1px #eaad2e !important;
+  --window-bg-color: #1e1f22;
+  --window-body-bg-color: #1e1f22;
+  --window-body-color: #e6e6e6;
+  --window-box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+  --window-box-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.6);
+  --selected-window-box-shadow: 0 10px 34px rgba(0, 0, 0, 0.7);
+  --window-title-bar-color: #e6e6e6;
+  --window-title-bar-bg-color: #2b2d31;
+  --win-icon-bg-color-hover: rgba(255, 255, 255, 0.12);
+  --close-icon-bg-color-hover: #e81123;
+  --close-icon-color-hover: #ffffff;
+  --scrollbar-thumb: rgba(180, 180, 180, 0.4);
+  --scrollbar-thumb-hover: rgba(210, 210, 210, 0.7);
+  --back-drop-bg-color: rgba(0, 0, 0, 0.6);
+  --loading-bg-color: #1e1f22;
+  --loading-color: #e6e6e6;
+  --focus-ring-color: #4c9aff;
+  --dock-item-bg-color: #2b2d31;
+  --dock-item-color: #e6e6e6;
+  --dock-item-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }

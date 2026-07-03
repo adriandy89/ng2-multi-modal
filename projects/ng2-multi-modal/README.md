@@ -1,203 +1,227 @@
-# Ng2MultiModal
+# ng2-multi-modal
 
-A powerful Angular Signals base multi-modal component library that supports provideExperimentalZonelessChangeDetection() configuration and removed zone.js.
-Support dragging, resizing, maximizing, minimizing, and various comprehensive modal functions. It supports creation through both declarative templates and service methods, complete modal lifecycle management, and highly customizable styles.
+A powerful, **signals-based, zoneless** multi-window modal library for Angular.
+Windows can be **dragged, resized, maximized, minimized (to a dock)**, stacked with
+automatic z-index/focus management, themed, and made fully **accessible**. Create them
+**declaratively** in a template or **imperatively** through a service — including rendering
+a **component as content** with injected data and an awaitable result.
 
-# screenshot
+- ✅ Angular **20, 21 and 22** — single published build
+- ✅ 100% signals, `OnPush`, **no `zone.js`** required
+- ✅ SSR-safe (no direct `window`/`document` access)
+- ✅ Accessible: `role="dialog"`, focus trap, keyboard control, localized labels
+- ✅ 7 built-in themes + ~70 CSS custom properties
+- ✅ No runtime dependencies beyond `tslib`
 
 ![screenshot](https://github.com/adriandy89/ng2-multi-modal/blob/master/public/screenshot.png?raw=true)
 
+## Compatibility
+
+| ng2-multi-modal | Angular            | Node                                   | TypeScript |
+| --------------- | ------------------ | -------------------------------------- | ---------- |
+| **2.x**         | 20 · 21 · 22       | ^20.19 \|\| ^22.12 \|\| >=24           | ≥ 5.8      |
+| 1.x             | 19                 | 18.19+ / 20.11+                        | 5.5–5.7    |
+
+The library is compiled in Angular's *partial* (Ivy) format against the lowest supported
+major (20), so a single package links cleanly into apps running 20, 21 or 22. Every release
+is verified by CI building a real consumer app on each version.
+
 ## Installation
 
-To install `ng2-multi-modal`, run:
-
 ```bash
-npm install ng2-multi-modal --save
+npm install ng2-multi-modal
 ```
 
-# Dependencies
+## Setup
 
-Latest version available for each version of Angular
+`ng2-multi-modal` is zoneless-first. Register the (optional) global config provider and,
+if your app is not already zoneless, enable zoneless change detection:
 
-| ng2-multi-modal | Angular     |
-|-----------------| ------------|
-| 1.0.3           | 19.0.0+     |
+```ts
+import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { provideNg2MultiModal } from 'ng2-multi-modal';
 
-## Usage
-
-Then add `Ng2MultiModalComponent` and `Ng2MultiModalService` to your standalone app's component imports:
-
-```typescript
-    imports: [Ng2MultiModalComponent],
-    providers: [Ng2MultiModalService]
-```
-
-Required for animations:
-
-```typescript
 export const appConfig: ApplicationConfig = {
-  providers: [provideAnimations()]
+  providers: [
+    provideZonelessChangeDetection(), // not needed on Angular 22 (zoneless by default)
+    provideNg2MultiModal({
+      theme: 'auto',        // 'light' | 'dark' | 'auto' (follows prefers-color-scheme)
+      language: 'es',       // 'en' | 'es' (or your own via `locale`)
+      zIndexBase: 1000,
+      closeOnEscape: true,
+    }),
+  ],
 };
 ```
 
-Using the service to create modals dynamically:
+Import the styles once (global stylesheet). Either the convenience bundle:
 
-```typescript
-import { Ng2MultiModalService } from "ng2-multi-modal";
+```scss
+@use 'ng2-multi-modal/styles.css';
+```
 
-@Component({
-    selector: "app-root",
-    templateUrl: "./app.component.html",
-    styleUrls: ["./app.component.scss"],
-    standalone: true,
-    imports: [Ng2MultiModalComponent],
-    providers: [Ng2MultiModalService]
-})
+…or pick the structural sheet + the theme(s) you want:
+
+```scss
+@use 'ng2-multi-modal/styles/style.css';
+@use 'ng2-multi-modal/styles/theme/default.css';
+@use 'ng2-multi-modal/styles/theme/default-dark.css';
+/* other themes: macos, material-design, ant-design, win11, glass */
+```
+
+## Usage
+
+### Open with the service
+
+```ts
+import { Component, inject } from '@angular/core';
+import { Ng2MultiModalService } from 'ng2-multi-modal';
+
+@Component({ /* … */ })
 export class AppComponent {
-  readonly theme = model<'light' | 'dark'>('dark');
-  tpl = viewChild.required('tpl', {
-    read: TemplateRef,
-  });
+  private readonly modal = inject(Ng2MultiModalService);
 
-  modals: {
-    [key: string]: {
-      modal: Ng2MultiModalComponent | null,
-      visible: boolean,
-    };
-  } = {};
-
-  constructor(private _modal: Ng2MultiModalService) {
-    effect(() => {
-      this._modal.dockTheme.set(this.theme());
-    });
+  openText() {
+    this.modal.open('Hello world', { title: 'Greeting', width: 360, height: 200 });
   }
 
-  toggleTheme() {
-    this.theme.update(prev => (prev === 'light' ? 'dark' : 'light'));
-  }
-
-  openModal() {
-    this._modal.create({
-      content: this.tpl(),
-      theme: this.theme
-    }).then((modal: Ng2MultiModalComponent) => {
-      const key = modal.modalId();
-      this.modals[key] = {
-        modal,
-        visible: true,
-      };
-      modal.maximized.set(false);
-      modal.onClose.subscribe(() => {
-        this.modals[key].visible = false;
-        this.modals[key].modal = null
-      });
-    });
+  openTemplate(tpl: TemplateRef<unknown>) {
+    this.modal.open(tpl, { title: 'From a template', theme: 'dark' });
   }
 }
 ```
 
-Using the component in your template:
+### Open a component as content (with data + result)
+
+```ts
+import { ModalRef, NG2_MODAL_DATA } from 'ng2-multi-modal';
+
+@Component({
+  template: `<h3>Hi {{ data.name }}</h3>
+             <button (click)="ref.close('ok')">OK</button>`,
+})
+export class MyDialog {
+  readonly data = inject<{ name: string }>(NG2_MODAL_DATA);
+  readonly ref = inject<ModalRef<string>>(ModalRef);
+}
+
+// caller
+const ref = this.modal.open<string, { name: string }>(MyDialog, {
+  title: 'Confirm',
+  data: { name: 'Ada' },
+  blocking: true,
+});
+ref.afterClosed().subscribe(result => console.log(result)); // 'ok'
+```
+
+### Declarative usage
 
 ```html
-<ng2-multi-modal>
-    <ng-template #content>
-        <!-- Modal content here -->
-    </ng-template>
+<ng2-multi-modal title="My window" [theme]="'auto'" (onClose)="onClosed()">
+  <p>Any projected content goes here.</p>
 </ng2-multi-modal>
 ```
 
-## Features
-
-- Draggable modals
-- Resizable modals
-- Maximize/minimize functionality
-- Multiple modals with z-index handling
-- Light and dark themes
-- Comprehensive modal lifecycle management
-- Highly customizable styles and behaviors
-- Angular 19+ signals API support
-
 ## API
 
-### Ng2MultiModalComponent
+### `Ng2MultiModalService`
 
-#### Inputs/Model Signals
+| Member | Description |
+| ------ | ----------- |
+| `open<R, D>(content?, options?): ModalRef<R, D>` | Open a window. `content` = `TemplateRef` \| component class \| string. |
+| `create(config)` | **@deprecated** v1 compatibility wrapper (returns a `Promise`). |
+| `bringToFront(id)` / `select(id)` | Raise / select a window. |
+| `addToDock(win)` / `removeFromDock(win)` | Dock management. |
+| `getRef(id)` | Get the `ModalRef` of an open window. |
+| `closeAll()` | Close every open window. |
+| `setLocale(lang)` | Switch language. |
+| `language`, `locale`, `dockTheme`, `prefersDark`, `selectedWindow`, `minimizedModals` | Reactive signals. |
 
-- `title` (string/TemplateRef): Modal title
-- `icon` (string/TemplateRef): Modal icon
-- `align` ('leftTop'/'rightTop'/'leftBottom'/'rightBottom'): Modal alignment
-- `width` (number): Modal width
-- `height` (number): Modal height
-- `minWidth` (number): Minimum modal width
-- `minHeight` (number): Minimum modal height
-- `offsetX` (number): X position offset
-- `offsetY` (number): Y position offset
-- `closable` (boolean): Whether the modal can be closed
-- `canMaximize` (boolean): Whether the modal can be maximized
-- `canMinimize` (boolean): Whether the modal can be minimized
-- `resizable` (boolean): Whether the modal can be resized
-- `outOfBounds` (boolean): Whether the modal can be dragged outside viewport
-- `draggable` (boolean): Whether the modal can be dragged
-- `loading` (boolean): Whether to show loading state
-- `loadingTip` (string/TemplateRef): Loading message/template
-- `content` (TemplateRef): Modal content
-- `contentScrollable` (boolean): Whether content can scroll
-- `theme` ('light'/'dark'): Modal theme
-- `zIndex` (number): Modal stacking order
-- `bodyStyle` (object): Custom styles for modal body
-- `closeOnNavigation` (boolean): Close modal when route changes
-- `minimized` (boolean): Whether the modal is minimized
-- `maximized` (boolean): Whether the modal is maximized
+### `ModalRef<R, D>`
 
-#### Outputs Signals
+`afterClosed(): Observable<R>` · `close(result?)` · `maximize()` · `minimize()` ·
+`restore()` · `focus()` · `bringToFront()` · `componentInstance` · `contentRef` ·
+`data` · `id` · `minimized` / `maximized` signals.
 
-- `onClose`: Emitted when modal closes
-- `onResize`: Emitted when modal is resized
-- `onMaximize`: Emitted when modal is maximized
-- `onMaximizeRestore`: Emitted when maximized modal is restored
-- `onMinimize`: Emitted when modal is minimized
-- `onMinimizeRestore`: Emitted when minimized modal is restored
-- `onSelected`: Emitted when modal is selected/focused
-- `onMove`: Emitted when modal is moved
+### `ModalOptions` / component inputs
 
-## Custom Styling
+`title`, `icon`, `align` (`leftTop|rightTop|leftBottom|rightBottom`), `width`, `height`,
+`minWidth`, `minHeight`, `offsetX`, `offsetY`, `zIndex`, `closable`, `maximizable`,
+`minimizable`, `resizable`, `draggable`, `outOfBounds`, `loading`, `loadingTip`,
+`theme` (`light|dark|auto`), `contentScrollable`, `bodyStyle`, `closeOnNavigation`,
+`minimized`, `maximized`, and the v2 additions: `blocking`, `closeOnEscape`,
+`closeOnBackdropClick`, `restoreFocus`, `ariaLabel`, `ariaDescribedBy`, `panelClass`,
+`animate`, `data`.
 
-Import the styles in your project:
+Outputs: `onReady`, `onClose`, `onResize`, `onMaximize`, `onMaximizeRestore`,
+`onMinimize`, `onMinimizeRestore`, `onSelected`, `onMove`.
+
+## Theming
+
+Override any CSS custom property globally (`:root` / `.ng-modal-theme-light`) or per dark
+theme (`.ng-modal-theme-dark`). Rules ship inside `@layer ng2-multi-modal`, so your app
+styles win without specificity hacks.
 
 ```css
-@import "ng2-multi-modal/styles/theme/default.css";
-@import "ng2-multi-modal/styles/style.css";
-
-/* For dark theme */
-@import "ng2-multi-modal/styles/theme/default-dark.css";
-/*other theme we apply:*/
-/*@import 'ng2-multi-modal/styles/theme/default.css'*/
-/*@import 'ng2-multi-modal/styles/theme/macos.css'*/
-/*@import 'ng2-multi-modal/styles/theme/material-design.css'*/
-```
-
-you can modify styles by overload css varibles:
-
-```css
-/*For example, you can change the window title bar text align*/
 :root {
-    --window-title-bar-text-align: left;
-}
-
-/*Or you can change the window title bar text align for dark theme*/
-.ng-modal-theme-dark {
-    --window-title-bar-text-align: center;
+  --window-border-radius: 14px;
+  --window-title-bar-bg-color: #101828;
+  --window-title-bar-color: #fff;
+  --focus-ring-color: #22d3ee;
 }
 ```
+
+Common variables (see `styles/theme/_tokens.scss` for the full catalog): `--window-bg-color`,
+`--window-body-bg-color`, `--window-body-color`, `--window-border-radius`,
+`--window-box-shadow`, `--selected-window-box-shadow`, `--window-back-drop-filter`,
+`--window-title-bar-*` (height, color, bg-color, radius, border, text-align, font-*),
+`--win-icon-*`, `--close-icon-bg-color-hover`, `--window-body-padding`, `--content-radius`,
+`--scrollbar-thumb`, `--back-drop-bg-color`, `--loading-*`, `--dock-*`, `--focus-ring-color`.
+
+Built-in themes: `default`, `default-dark`, `macos`, `material-design`, `ant-design`,
+`win11`, `glass`. `theme: 'auto'` follows the OS `prefers-color-scheme`; animations respect
+`prefers-reduced-motion`; below 600px windows go full-screen.
+
+## Accessibility
+
+- `role="dialog"`, `aria-modal` (in `blocking` mode), `aria-labelledby`/`aria-label`.
+- Window controls are real `<button>`s with localized `aria-label`s.
+- **Escape** closes (when `closeOnEscape` + `closable`); a lightweight **focus trap** and
+  **focus restoration** run in `blocking` mode.
+- Keyboard move/resize: focus the title bar, then arrow keys move (Shift = larger step,
+  Alt = resize).
+
+## i18n
+
+Built-in `en` and `es`. Override or add strings via the config provider:
+
+```ts
+provideNg2MultiModal({
+  language: 'es',
+  locale: { es: { close: 'Cerrar ventana' } },
+});
+```
+
+## Migrating from v1
+
+- `Ng2MultiModalService.create(config)` → **`open(content, options)`** returning a `ModalRef`
+  (`create()` still works, deprecated). Options are now **plain values**, not signals.
+- `provideAnimations()` is **no longer required** — animations are pure CSS.
+- Theme file `materia-design.css` → **`material-design.css`**; new `win11` and `glass` themes.
+- New `provideNg2MultiModal()` for global defaults & i18n, plus `NG2_MODAL_DATA` for
+  component content.
+- Deep style imports are now declared in `exports`; a combined `ng2-multi-modal/styles.css`
+  is available.
 
 ## Development
 
-To run the demo application:
+```bash
+npm install
+npm run build:lib     # compile styles + library + patch exports
+npm test              # library unit tests (headless Chrome)
+npm start             # run the demo app (projects/demo)
+```
 
-1. Clone the repository to your local machine.
-2. Install dependencies using `npm install`.
-3. Start the demo using `npm run start`.
+## License
 
-## Contribution
-
-We welcome community contributions and pull requests. To contribute to `ng2-multi-modal`, please fork the repository and open a pull request.
+MIT © Adrian Duardo

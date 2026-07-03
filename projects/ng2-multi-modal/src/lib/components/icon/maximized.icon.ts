@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'maximized-icon',
@@ -37,9 +37,6 @@ import { Component } from '@angular/core';
         ></rect>
     </svg>
   `,
-  styles: [],
-  standalone: true
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MaximizeDIcon {
-  constructor() {}
-}
+export class MaximizeDIcon {}

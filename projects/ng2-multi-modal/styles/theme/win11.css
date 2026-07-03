@@ -1,0 +1,92 @@
+/** Windows 11 (Mica/Fluent) flavored theme. */
+/**
+ * Shared token catalog. `base-vars()` emits the full set of CSS custom
+ * properties with the default (light) values; every theme includes it and then
+ * overrides only what differs. This keeps each theme a complete, drop-in file.
+ */
+:root,
+.ng-modal-theme-light {
+  --window-wrapper-zIndex: 1000;
+  /* Window shell */
+  --window-bg-color: #ffffff;
+  --window-body-bg-color: #ffffff;
+  --window-body-color: #1f2329;
+  --window-border-radius: 10px;
+  --window-box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  --window-box-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.22);
+  --selected-window-box-shadow: 0 10px 34px rgba(0, 0, 0, 0.28);
+  --window-back-drop-filter: none;
+  --window-opacity: 1;
+  --window-animation-duration: 0.2s;
+  /* Title bar */
+  --window-title-bar-offset: 0px;
+  --window-title-bar-height: 36px;
+  --window-title-bar-color: #1f2329;
+  --window-title-bar-bg-color: #f2f3f5;
+  --window-title-bar-radius: 0px;
+  --window-title-bar-border-color: transparent;
+  --window-title-bar-border-width: 0px;
+  --window-title-bar-border-style: solid;
+  --window-title-bar-text-align: left;
+  --window-title-bar-font-family: inherit;
+  --window-title-bar-font-weight: 600;
+  --window-title-bar-font-size: 13px;
+  --window-title-name-padding: 0 6px;
+  --icon-width: 16px;
+  /* Window control buttons */
+  --win-icon-size: 24px;
+  --win-icon-padding: 5px;
+  --win-icon-radius: 6px;
+  --win-icon-bg-color: transparent;
+  --win-icon-bg-color-hover: rgba(0, 0, 0, 0.08);
+  --win-icon-border: none;
+  --win-icon-svg-width: 11px;
+  --win-theme-icon-svg-display: block;
+  --apple-theme-icon-svg-display: none;
+  --minimize-icon-order: 1;
+  --maximize-icon-order: 2;
+  --close-icon-order: 3;
+  --close-icon-bg-color-hover: #e81123;
+  --close-icon-color-hover: #ffffff;
+  /* Body */
+  --window-body-offset-x: 0px;
+  --window-body-offset-y: 0px;
+  --window-body-padding: 12px;
+  --content-radius: 0px;
+  --scrollbar-thumb: rgba(120, 120, 120, 0.6);
+  --scrollbar-thumb-hover: rgba(80, 80, 80, 0.9);
+  /* Backdrop / loading / focus */
+  --back-drop-bg-color: rgba(0, 0, 0, 0.4);
+  --back-drop-blur: 2px;
+  --loading-bg-color: #ffffff;
+  --loading-color: #1f2329;
+  --loading-width: 200px;
+  --loading-height: 110px;
+  --focus-ring-color: #2684ff;
+  /* Dock */
+  --dock-right: 16px;
+  --dock-bottom: 8px;
+  --dock-gap: 6px;
+  --dock-height: 40px;
+  --dock-item-bg-color: #f2f3f5;
+  --dock-item-color: #1f2329;
+  --dock-item-radius: 8px;
+  --dock-item-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  --dock-item-max-width: 220px;
+  --window-border-radius: 8px;
+  --window-bg-color: #f3f3f3;
+  --window-body-bg-color: #fbfbfb;
+  --window-box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
+  --selected-window-box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+  --window-back-drop-filter: saturate(150%) blur(2px);
+  --window-title-bar-height: 34px;
+  --window-title-bar-bg-color: #f3f3f3;
+  --window-title-bar-color: #1a1a1a;
+  --window-title-bar-text-align: left;
+  --window-title-bar-font-size: 12.5px;
+  --window-title-bar-font-weight: 600;
+  --win-icon-radius: 4px;
+  --win-icon-bg-color-hover: rgba(0, 0, 0, 0.06);
+  --focus-ring-color: #005fb8;
+  --window-body-padding: 14px;
+}

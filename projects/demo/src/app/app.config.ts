@@ -1,9 +1,17 @@
-import { ApplicationConfig, provideExperimentalZonelessChangeDetection, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-
+import { provideNg2MultiModal } from 'ng2-multi-modal';
 import { routes } from './app.routes';
-import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideExperimentalZonelessChangeDetection(), provideRouter(routes), provideAnimations()]
+  providers: [
+    provideZonelessChangeDetection(),
+    provideRouter(routes),
+    provideNg2MultiModal({
+      theme: 'auto',
+      language: 'es',
+      zIndexBase: 1000,
+      closeOnEscape: true,
+    }),
+  ],
 };

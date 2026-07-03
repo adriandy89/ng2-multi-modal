@@ -1,5 +1,24 @@
-/* You can add global styles to this file, and also import other style files */
+/* Demo global styles — import the library structural + default themes. */
+@import "../../ng2-multi-modal/styles/style.css";
+@import "../../ng2-multi-modal/styles/theme/default.css";
+@import "../../ng2-multi-modal/styles/theme/default-dark.css";
 
-@import "../projects/ng2-multi-modal/styles/style.css";
-@import "../projects/ng2-multi-modal/styles/theme/default.css";
-@import "../projects/ng2-multi-modal/styles/theme/default-dark.css";
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #f6f7f9;
+  color: #1f2329;
+}
+
+body.demo-dark {
+  background: #16181d;
+  color: #e6e6e6;
+}

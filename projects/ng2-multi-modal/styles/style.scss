@@ -1,0 +1,413 @@
+/**
+ * ng2-multi-modal — structural stylesheet.
+ *
+ * Consumes the CSS custom properties defined by the theme files
+ * (`theme/default.css`, `theme/default-dark.css`, …). Wrapped in a cascade
+ * `@layer` so host applications can override any rule without specificity wars.
+ */
+@layer ng2-multi-modal {
+  /* Global host layer for dynamically created windows. */
+  #ng-modal-wrapper {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: var(--window-wrapper-zIndex, 1000);
+    pointer-events: none;
+  }
+
+  /* Prevent text selection while dragging / resizing. */
+  body.ng2-modal-no-select,
+  body.ng2-modal-no-select * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+  }
+
+  @keyframes ng-modal-popup {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: var(--window-opacity, 1);
+      transform: scale(1);
+    }
+  }
+
+  @keyframes ng-modal-minimize {
+    to {
+      opacity: 0;
+      transform: translateY(40vh) scale(0.1);
+    }
+  }
+
+  @keyframes ng-modal-dock-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes ng-modal-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ── Backdrop (blocking mode) ─────────────────────────────────────────────── */
+  .ng-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--back-drop-bg-color, rgba(0, 0, 0, 0.45));
+    backdrop-filter: blur(var(--back-drop-blur, 2px));
+    pointer-events: auto;
+    animation: ng-modal-popup 0.2s ease both;
+  }
+
+  /* ── Window ───────────────────────────────────────────────────────────────── */
+  .ng-modal {
+    position: fixed;
+    box-sizing: border-box;
+    background: var(--window-bg-color);
+    color: var(--window-body-color);
+    border-radius: var(--window-border-radius);
+    box-shadow: var(--window-box-shadow);
+    backdrop-filter: var(--window-back-drop-filter);
+    opacity: var(--window-opacity);
+    pointer-events: auto;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    outline: none;
+    transition:
+      box-shadow 0.15s ease,
+      opacity 0.15s ease;
+
+    &.ng-modal-animate {
+      animation: ng-modal-popup var(--window-animation-duration, 0.2s)
+        cubic-bezier(0.3, 1, 0.3, 1) backwards;
+    }
+
+    &:hover {
+      box-shadow: var(--window-box-shadow-hover, var(--window-box-shadow));
+    }
+
+    &.selected {
+      box-shadow: var(--selected-window-box-shadow, var(--window-box-shadow));
+      opacity: 1;
+    }
+
+    &.maximized {
+      border-radius: 0;
+      box-shadow: none;
+
+      .win-title-bar {
+        border-radius: 0;
+      }
+    }
+
+    &.minimized {
+      pointer-events: none;
+      transform-origin: bottom right;
+      animation: ng-modal-minimize var(--window-animation-duration, 0.25s)
+        cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* Title bar / drag handle */
+    .win-title-bar {
+      position: absolute;
+      left: var(--window-title-bar-offset, 0);
+      top: var(--window-title-bar-offset, 0);
+      width: calc(100% - var(--window-title-bar-offset, 0px) * 2);
+      height: var(--window-title-bar-height);
+      line-height: var(--window-title-bar-height);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 6px;
+      box-sizing: border-box;
+      font-family: var(--window-title-bar-font-family, inherit);
+      font-weight: var(--window-title-bar-font-weight, 500);
+      color: var(--window-title-bar-color);
+      background: var(--window-title-bar-bg-color);
+      border-radius: var(--window-title-bar-radius);
+      border-color: var(--window-title-bar-border-color, transparent);
+      border-width: var(--window-title-bar-border-width, 0);
+      border-style: var(--window-title-bar-border-style, solid);
+      text-align: var(--window-title-bar-text-align, center);
+      user-select: none;
+      touch-action: none;
+      cursor: move;
+
+      &.no-drag {
+        cursor: default;
+      }
+
+      .title-name {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: var(--window-title-bar-font-size);
+        padding: var(--window-title-name-padding, 0 4px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: inherit;
+      }
+
+      .icon {
+        width: var(--icon-width, 16px);
+        height: var(--icon-width, 16px);
+        vertical-align: middle;
+        margin-right: 4px;
+      }
+
+      .win-icons {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        flex: 0 0 auto;
+
+        .win-icon {
+          appearance: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
+          width: var(--win-icon-size, 22px);
+          height: var(--win-icon-size, 22px);
+          padding: var(--win-icon-padding, 4px);
+          border-radius: var(--win-icon-radius, 6px);
+          background: var(--win-icon-bg-color, transparent);
+          border: var(--win-icon-border, none);
+          color: var(--window-title-bar-color);
+          cursor: pointer;
+          transition:
+            background 0.12s ease,
+            color 0.12s ease;
+
+          svg {
+            width: var(--win-icon-svg-width, 10px);
+            height: var(--win-icon-svg-width, 10px);
+            display: block;
+            pointer-events: none;
+
+            .win-theme {
+              display: var(--win-theme-icon-svg-display, block);
+            }
+            .apple-theme {
+              display: var(--apple-theme-icon-svg-display, none);
+            }
+          }
+
+          &:hover {
+            background: var(--win-icon-bg-color-hover, rgba(0, 0, 0, 0.08));
+          }
+          &:focus-visible {
+            outline: 2px solid var(--focus-ring-color, #2684ff);
+            outline-offset: 1px;
+          }
+
+          &.minimize {
+            order: var(--minimize-icon-order, 1);
+          }
+          &.maximize,
+          &.maximized {
+            order: var(--maximize-icon-order, 2);
+          }
+          &.close {
+            order: var(--close-icon-order, 3);
+            &:hover {
+              background: var(--close-icon-bg-color-hover, #e81123);
+              color: var(--close-icon-color-hover, #fff);
+            }
+          }
+        }
+      }
+    }
+
+    /* Body / content area */
+    .body {
+      position: absolute;
+      left: var(--window-body-offset-x, 0);
+      width: calc(100% - var(--window-body-offset-x, 0px) * 2);
+      top: calc(
+        var(--window-title-bar-height) + var(--window-title-bar-offset, 0px) +
+          var(--window-body-offset-y, 0px)
+      );
+      height: calc(
+        100% - var(--window-title-bar-height) - var(--window-title-bar-offset, 0px) -
+          var(--window-body-offset-y, 0px) * 2
+      );
+      padding: var(--window-body-padding, 8px);
+      background: var(--window-body-bg-color);
+      color: var(--window-body-color);
+      border-radius: var(--content-radius, 0);
+      box-sizing: border-box;
+      overflow: auto;
+
+      &.no-scroll {
+        overflow: hidden;
+      }
+
+      /* Themed scrollbars (scoped to the window, WebKit + Firefox). */
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb, rgba(155, 155, 155, 0.8)) transparent;
+
+      &::-webkit-scrollbar {
+        width: 9px;
+        height: 7px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background: var(--scrollbar-thumb, rgba(155, 155, 155, 0.8));
+      }
+      &::-webkit-scrollbar-thumb:hover {
+        background: var(--scrollbar-thumb-hover, rgba(99, 99, 99, 1));
+      }
+    }
+  }
+
+  /* SVG icon coloring hooks. */
+  .ng-modal svg path.color-path,
+  .ng-modal-dock svg path.color-path {
+    fill: currentColor;
+  }
+  .ng-modal svg rect.color-rect,
+  .ng-modal-dock svg rect.color-rect {
+    stroke: currentColor;
+  }
+
+  /* ── Loading overlay ──────────────────────────────────────────────────────── */
+  .window-loading {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: var(--loading-width, 200px);
+    height: var(--loading-height, 110px);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    background: var(--loading-bg-color, var(--window-bg-color, #fff));
+    color: var(--loading-color, var(--window-body-color, #333));
+    border-radius: var(--window-border-radius, 8px);
+    box-shadow: var(--window-box-shadow, 0 1px 7px rgba(0, 0, 0, 0.3));
+    pointer-events: auto;
+
+    .window-loading-spinner {
+      color: var(--loading-color, var(--window-body-color, #333));
+      line-height: 0;
+
+      svg {
+        animation: ng-modal-spin 1s linear infinite;
+      }
+    }
+  }
+
+  /* ── Dock (minimized windows) ─────────────────────────────────────────────── */
+  .ng-modal-dock {
+    position: fixed;
+    right: var(--dock-right, 16px);
+    bottom: var(--dock-bottom, 8px);
+    display: inline-flex;
+    gap: var(--dock-gap, 6px);
+    height: var(--dock-height, 40px);
+    z-index: var(--window-wrapper-zIndex, 1000);
+    pointer-events: none;
+
+    .ng-modal-dock-item {
+      display: flex;
+      align-items: center;
+      height: var(--dock-height, 40px);
+      max-width: var(--dock-item-max-width, 220px);
+      padding: 0 10px;
+      background: var(--dock-item-bg-color, var(--window-title-bar-bg-color));
+      color: var(--dock-item-color, var(--window-title-bar-color));
+      border-radius: var(--dock-item-radius, 8px);
+      box-shadow: var(--dock-item-shadow, 0 2px 8px rgba(0, 0, 0, 0.2));
+      cursor: pointer;
+      pointer-events: auto;
+      overflow: hidden;
+      animation: ng-modal-dock-in 0.3s cubic-bezier(0.05, 0.7, 0.1, 1) both;
+
+      .icon {
+        width: var(--icon-width, 16px);
+        height: var(--icon-width, 16px);
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+
+      .ng-modal-dock-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .ng-modal-dock-close {
+        appearance: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 10px;
+        padding: 4px;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+
+        &:hover {
+          background: var(--close-icon-bg-color-hover, #e81123);
+          color: #fff;
+        }
+        &:focus-visible {
+          outline: 2px solid var(--focus-ring-color, #2684ff);
+          outline-offset: 1px;
+        }
+      }
+    }
+  }
+
+  /* ── Responsive: below the breakpoint, windows fill the screen ────────────── */
+  @media (max-width: 600px) {
+    .ng-modal:not(.minimized) {
+      left: 0 !important;
+      right: 0 !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      border-radius: 0;
+    }
+    .ng-modal .win-title-bar {
+      cursor: default;
+    }
+    .ng-modal-dock {
+      right: 8px;
+      left: 8px;
+      overflow-x: auto;
+    }
+  }
+
+  /* ── Reduced motion ───────────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .ng-modal,
+    .ng-modal.ng-modal-animate,
+    .ng-modal.minimized,
+    .ng-modal-backdrop,
+    .ng-modal-dock-item,
+    .window-loading-spinner svg {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
