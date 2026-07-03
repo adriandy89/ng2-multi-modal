@@ -1,0 +1,36 @@
+/** Translucent "glass" / acrylic theme (relies on backdrop-filter). */
+@use 'tokens';
+
+:root,
+.ng-modal-theme-light {
+  @include tokens.base-vars();
+
+  --window-border-radius: 16px;
+  --window-bg-color: rgba(255, 255, 255, 0.55);
+  --window-body-bg-color: rgba(255, 255, 255, 0.35);
+  --window-body-color: #16181d;
+  --window-back-drop-filter: blur(18px) saturate(180%);
+  --window-box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  --selected-window-box-shadow: 0 14px 50px rgba(0, 0, 0, 0.32);
+
+  --window-title-bar-height: 38px;
+  --window-title-bar-bg-color: rgba(255, 255, 255, 0.25);
+  --window-title-bar-color: #16181d;
+  --window-title-bar-text-align: center;
+  --window-title-bar-border-color: rgba(255, 255, 255, 0.4);
+  --window-title-bar-border-width: 0 0 1px 0;
+
+  --win-icon-bg-color-hover: rgba(255, 255, 255, 0.4);
+  --scrollbar-thumb: rgba(80, 80, 80, 0.4);
+  --window-body-padding: 16px;
+}
+
+.ng-modal-theme-dark {
+  --window-bg-color: rgba(30, 31, 34, 0.55);
+  --window-body-bg-color: rgba(30, 31, 34, 0.4);
+  --window-body-color: #e6e6e6;
+  --window-title-bar-bg-color: rgba(43, 45, 49, 0.35);
+  --window-title-bar-color: #e6e6e6;
+  --window-title-bar-border-color: rgba(255, 255, 255, 0.12);
+  --win-icon-bg-color-hover: rgba(255, 255, 255, 0.18);
+}

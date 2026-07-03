@@ -1,0 +1,11 @@
+/**
+ * Default (light) theme. Defines the full custom-property catalog on both
+ * `:root` (global default) and `.ng-modal-theme-light` (explicit hook used by
+ * `theme: 'auto'`). Pair with `default-dark.css` for dark mode.
+ */
+@use 'tokens';
+
+:root,
+.ng-modal-theme-light {
+  @include tokens.base-vars();
+}

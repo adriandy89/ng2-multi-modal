@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  library:
+    name: Build & test library (Angular 20)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - id: chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - run: npm ci
+
+      - name: Build library (styles + ng-packagr + patched exports)
+        run: npm run build:lib
+
+      - name: Unit tests (headless Chrome)
+        run: npx ng test ng2-multi-modal --watch=false --browsers=ChromeHeadlessNoSandbox
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+
+      - name: Upload built package
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/ng2-multi-modal
+
+  compat:
+    name: Consume in Angular ${{ matrix.angular }}
+    needs: library
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - angular: 20
+            node: 22
+          - angular: 21
+            node: 24
+          - angular: 22
+            node: 26
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Restore built package
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/ng2-multi-modal
+
+      - name: Install example (Angular ${{ matrix.angular }})
+        working-directory: examples/ng${{ matrix.angular }}
+        run: npm install --legacy-peer-deps --no-audit --no-fund
+
+      - name: Build example (proves the published package links on Angular ${{ matrix.angular }})
+        working-directory: examples/ng${{ matrix.angular }}
+        run: npm run build

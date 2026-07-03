@@ -1,0 +1,25 @@
+/** Ant-Design-flavored theme (light header, subtle border, blue accents). */
+@use 'tokens';
+
+:root,
+.ng-modal-theme-light {
+  @include tokens.base-vars();
+
+  --window-border-radius: 8px;
+  --window-box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12);
+  --selected-window-box-shadow: 0 9px 28px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.08);
+
+  --window-title-bar-height: 40px;
+  --window-title-bar-bg-color: #ffffff;
+  --window-title-bar-color: rgba(0, 0, 0, 0.88);
+  --window-title-bar-border-color: #f0f0f0;
+  --window-title-bar-border-width: 0 0 1px 0;
+  --window-title-bar-border-style: solid;
+  --window-title-bar-text-align: left;
+  --window-title-bar-font-weight: 600;
+  --window-title-bar-font-size: 15px;
+
+  --win-icon-bg-color-hover: rgba(0, 0, 0, 0.06);
+  --focus-ring-color: #1677ff;
+  --window-body-padding: 16px;
+}

@@ -1,0 +1,26 @@
+/** Windows 11 (Mica/Fluent) flavored theme. */
+@use 'tokens';
+
+:root,
+.ng-modal-theme-light {
+  @include tokens.base-vars();
+
+  --window-border-radius: 8px;
+  --window-bg-color: #f3f3f3;
+  --window-body-bg-color: #fbfbfb;
+  --window-box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
+  --selected-window-box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+  --window-back-drop-filter: saturate(150%) blur(2px);
+
+  --window-title-bar-height: 34px;
+  --window-title-bar-bg-color: #f3f3f3;
+  --window-title-bar-color: #1a1a1a;
+  --window-title-bar-text-align: left;
+  --window-title-bar-font-size: 12.5px;
+  --window-title-bar-font-weight: 600;
+
+  --win-icon-radius: 4px;
+  --win-icon-bg-color-hover: rgba(0, 0, 0, 0.06);
+  --focus-ring-color: #005fb8;
+  --window-body-padding: 14px;
+}

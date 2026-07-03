@@ -1,0 +1,26 @@
+/** macOS-flavored theme (rounded, centered title, Apple-style control glyphs). */
+@use 'tokens';
+
+:root,
+.ng-modal-theme-light {
+  @include tokens.base-vars();
+
+  --window-border-radius: 12px;
+  --window-box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+  --selected-window-box-shadow: 0 16px 50px rgba(0, 0, 0, 0.34);
+
+  --window-title-bar-height: 30px;
+  --window-title-bar-bg-color: #e9e9ea;
+  --window-title-bar-color: #4a4a4a;
+  --window-title-bar-text-align: center;
+  --window-title-bar-font-size: 12.5px;
+  --window-title-bar-font-weight: 600;
+
+  --win-theme-icon-svg-display: none;
+  --apple-theme-icon-svg-display: block;
+  --win-icon-size: 14px;
+  --win-icon-svg-width: 8px;
+  --win-icon-radius: 50%;
+
+  --window-body-padding: 14px;
+}

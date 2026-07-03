@@ -1,96 +1,105 @@
+@if (blocking() && !minimized() && !loading()) {
+  <div
+    class="ng-modal-backdrop"
+    [class]="'ng-modal-theme-' + resolvedTheme()"
+    [style.z-index]="zIndex() - 1"
+    (click)="onBackdropClick()"
+  ></div>
+}
+
 <div
-  [ngClass]="[
-    'ng-modal',
-    'ng-modal-theme' + (this.theme() === 'dark' ? '-dark' : '')
-  ]"
+  #windowEl
+  [class]="windowClasses()"
+  [style]="windowStyle()"
   [hidden]="loading()"
-  [ngStyle]="position()"
-  [style.width.px]="width()"
-  [style.height.px]="height()"
-  [style.cursor]="cursorStyle()"
-  [style.z-index]="zIndex()"
-  [style.display]="display()"
-></div>
-<div
-  [class]="'ng-modal ng-modal-theme' + (this.theme() === 'dark' ? '-dark' : '')"
-  [hidden]="loading()"
-  [ngClass]="{
-    selected: selectedSignal(),
-    minimized: minimized(),
-    maximized: maximized()
-  }"
-  [ngStyle]="position()"
-  [style.width.px]="width()"
-  [style.height.px]="height()"
-  [style.cursor]="cursorStyle()"
-  [style.z-index]="zIndex()"
-  [style.display]="display()"
-  (mouseenter)="windowMouseEnter($event)"
-  (mousedown)="windowMouseDown($event)"
-  (mouseleave)="windowMouseLeave($event)"
+  role="dialog"
+  [attr.aria-modal]="blocking() ? 'true' : 'false'"
+  [attr.aria-label]="ariaLabelText()"
+  [attr.aria-labelledby]="titleTextId()"
+  [attr.aria-describedby]="ariaDescribedBy()"
+  tabindex="-1"
+  (pointerdown)="onWindowPointerDown($event)"
+  (pointermove)="onWindowPointerMove($event)"
+  (keydown)="onKeydown($event)"
 >
   <div
     #titleBar
     class="win-title-bar"
-    *ngIf="!!title()"
+    [class.no-drag]="!draggable()"
+    tabindex="0"
+    (pointerdown)="onTitlePointerDown($event)"
     (dblclick)="maximize()"
-    [ngClass]="{ 'no-drag': !draggable() }"
-    (mousedown)="titleBarMouseDown($event)"
   >
-    <div class="title-name" [title]="title()">
+    <div class="title-name" [id]="titleId()">
       <ng-container *stringTemplateOutlet="icon()">
         @if (icon()) {
-        <img class="icon" draggable="false" [src]="icon()" alt="icon" />
+          <img class="icon" draggable="false" [src]="icon()" alt="" />
         }
       </ng-container>
       <ng-container *stringTemplateOutlet="title()">{{ title() }}</ng-container>
     </div>
+
     <div class="win-icons">
-      <close-icon
-        class="win-icon"
-        [title]="getLocaleText('close')"
-        (click)="close()"
-      />
-      <minimize-icon
-        class="win-icon"
-        [title]="getLocaleText('minimize')"
-        (click)="minimize()"
-      />
-      <maximize-icon
-        class="win-icon"
-        [title]="getLocaleText('maximize')"
-        *ngIf="!maximized()"
-        (click)="maximize()"
-      />
-      <maximized-icon
-        class="win-icon"
-        [title]="getLocaleText('windowMode')"
-        *ngIf="maximized()"
-        (click)="maximize()"
-      />
+      @if (minimizable()) {
+        <button
+          type="button"
+          class="win-icon minimize"
+          [attr.aria-label]="locale().minimize"
+          [title]="locale().minimize"
+          (click)="minimize()"
+        >
+          <minimize-icon />
+        </button>
+      }
+      @if (maximizable()) {
+        @if (!maximized()) {
+          <button
+            type="button"
+            class="win-icon maximize"
+            [attr.aria-label]="locale().maximize"
+            [title]="locale().maximize"
+            (click)="maximize()"
+          >
+            <maximize-icon />
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="win-icon maximized"
+            [attr.aria-label]="locale().restore"
+            [title]="locale().windowMode"
+            (click)="maximize()"
+          >
+            <maximized-icon />
+          </button>
+        }
+      }
+      @if (closable()) {
+        <button
+          type="button"
+          class="win-icon close"
+          [attr.aria-label]="locale().close"
+          [title]="locale().close"
+          (click)="close()"
+        >
+          <close-icon />
+        </button>
+      }
     </div>
   </div>
-  <div
-    class="body"
-    [ngClass]="contentScrollable() ? 'no-scroll' : ''"
-    [ngStyle]="bodyStyle()"
-  >
-    <ng-container *stringTemplateOutlet="content">{{ content() }}</ng-container>
-    <ng-content></ng-content>
+
+  <div class="body" [class.no-scroll]="!contentScrollable()" [style]="bodyStyle()">
+    @if (content()) {
+      <ng-container *stringTemplateOutlet="content()">{{ content() }}</ng-container>
+    }
+    <ng-container #contentHost />
+    <ng-content />
   </div>
 </div>
 
-<ng-container *stringTemplateOutlet="loadingTip()">
-  <div
-    [class]="'window-loading' + (this.theme() === 'dark' ? '-dark' : '')"
-    [ngStyle]="position()"
-    *ngIf="loading()"
-  >
-    <div>
-      <loading-icon />
-    </div>
-    <ng-container *stringTemplateOutlet="loadingTip()">{{
-      loadingTip()
-    }}</ng-container>
+@if (loading()) {
+  <div class="window-loading" [class]="'ng-modal-theme-' + resolvedTheme()">
+    <div class="window-loading-spinner"><loading-icon /></div>
+    <ng-container *stringTemplateOutlet="resolvedLoadingTip()">{{ resolvedLoadingTip() }}</ng-container>
   </div>
-</ng-container>
+}
