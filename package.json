@@ -10,6 +10,7 @@
     "build:styles": "sass projects/ng2-multi-modal/styles:projects/ng2-multi-modal/styles --style=expanded --no-source-map",
     "build:lib": "npm run build:styles && ng build ng2-multi-modal && node scripts/patch-dist-exports.mjs",
     "pack:lib": "npm run build:lib && cd dist/ng2-multi-modal && npm pack",
+    "pack:examples": "npm run build:lib && node scripts/pack-to-examples.mjs",
     "watch": "ng build ng2-multi-modal --watch --configuration development",
     "test": "ng test ng2-multi-modal --watch=false --browsers=ChromeHeadless"
   },

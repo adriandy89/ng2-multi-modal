@@ -41,13 +41,16 @@ npm run pack:lib      # build + npm pack the library tarball
 
 ### Verifying multi-version compatibility locally
 
+Each example installs the library as a **packed tarball** (not a `file:` symlink) so it resolves
+Angular from its own `node_modules` — exactly like a real consumer:
+
 ```bash
-npm run build:lib
+npm run pack:examples   # builds the lib, packs it, copies ng2-multi-modal.tgz into each example
 cd examples/ng21 && npm install --legacy-peer-deps && npm run build
 ```
 
-> Note: the Angular **22** CLI requires Node ≥ 24.15 (or 26); use a matching Node to build
-> `examples/ng22` locally. CI runs each example on an appropriate Node version.
+> Note: the Angular **22** CLI requires Node ≥ 24.15 (or 26) and TypeScript 6; use a matching
+> Node to build `examples/ng22` locally. CI runs every example on Node 24.
 
 ## Publishing
 

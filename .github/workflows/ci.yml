@@ -31,11 +31,16 @@ jobs:
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
 
-      - name: Upload built package
+      - name: Pack the library tarball
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/pkg"
+          cd dist/ng2-multi-modal && npm pack --pack-destination "$GITHUB_WORKSPACE/pkg"
+
+      - name: Upload library tarball
         uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: dist/ng2-multi-modal
+          name: pkg
+          path: pkg/*.tgz
 
   compat:
     name: Consume in Angular ${{ matrix.angular }}
@@ -44,25 +49,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - angular: 20
-            node: 22
-          - angular: 21
-            node: 24
-          - angular: 22
-            node: 26
+        angular: [20, 21, 22]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 24
 
-      - name: Restore built package
+      - name: Download library tarball
         uses: actions/download-artifact@v4
         with:
-          name: dist
-          path: dist/ng2-multi-modal
+          name: pkg
+          path: pkg
+
+      - name: Place tarball into the example
+        run: cp pkg/*.tgz examples/ng${{ matrix.angular }}/ng2-multi-modal.tgz
 
       - name: Install example (Angular ${{ matrix.angular }})
         working-directory: examples/ng${{ matrix.angular }}
